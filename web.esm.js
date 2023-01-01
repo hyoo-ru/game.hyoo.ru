@@ -3019,7 +3019,7 @@ var $;
                     const { angle, place_coord, place_kind, place_side, x: tx, y: ty } = this.ray(a);
                     const plank_height = Math.round(perspective / angle) / 2;
                     const x = a - .5;
-                    const y = .5 + (height - plank_height) / 2 - plank_height / 4;
+                    const y = .5 + (height - plank_height) / 2 - plank_height / 4 + height / 10;
                     const texture = this.side_texture({ place_coord, place_kind, place_side });
                     let side_x = (tx % wall_size + ty % wall_size) / wall_size;
                     if (place_side === 'd' || place_side === 'l')

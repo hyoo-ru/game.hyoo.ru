@@ -965,9 +965,7 @@ declare namespace $ {
         width(): number;
         height(): number;
         height_half(): number;
-        place_skins(): {
-            "@": readonly string[];
-        };
+        place_skins(): {};
     }
 }
 

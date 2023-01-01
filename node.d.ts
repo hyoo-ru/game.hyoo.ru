@@ -974,6 +974,9 @@ declare namespace $ {
 }
 
 declare namespace $.$$ {
+}
+
+declare namespace $.$$ {
     class $hyoo_game_eye extends $.$hyoo_game_eye {
         width(): number;
         height(): number;

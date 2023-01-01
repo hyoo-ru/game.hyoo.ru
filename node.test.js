@@ -3364,6 +3364,18 @@ var $;
 (function ($) {
     var $$;
     (function ($$) {
+        $mol_style_define($hyoo_game_eye, {
+            imageRendering: 'pixelated',
+        });
+    })($$ = $.$$ || ($.$$ = {}));
+})($ || ($ = {}));
+//hyoo/game/eye/eye.view.css.ts
+;
+"use strict";
+var $;
+(function ($) {
+    var $$;
+    (function ($$) {
         function radians(angle) {
             return angle * (Math.PI / 180);
         }

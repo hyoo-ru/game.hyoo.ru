@@ -3384,14 +3384,6 @@ var $;
 (function ($) {
     var $$;
     (function ($$) {
-        function radians(angle) {
-            return angle * (Math.PI / 180);
-        }
-        const tload = (src) => new Promise(done => {
-            const texture = new Image;
-            texture.src = src;
-            texture.onload = () => done(texture);
-        });
         class $hyoo_game_eye extends $.$hyoo_game_eye {
             width() {
                 return this.view_rect()?.width ?? 0;
@@ -3462,7 +3454,7 @@ var $;
                 }
             }
             ray(a) {
-                const max_d = Math.tan(radians(this.fov() / 2));
+                const max_d = Math.tan(this.fov() * Math.PI / 360);
                 const step = max_d * 2 / this.width();
                 const d = -max_d + (a + 0.5) * step;
                 const ray_angle = Math.atan2(d, 1);

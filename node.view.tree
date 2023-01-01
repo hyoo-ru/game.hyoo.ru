@@ -1,0 +1,170 @@
+$mol_stack $mol_view
+
+$hyoo_game_realm $mol_object2
+	wall_size 10
+	map \ 
+	map_rows /string
+	map_width 0
+	map_height 0
+	spawn_pos /number
+		0
+		0
+
+$hyoo_game_actor $mol_object2
+	Realm $hyoo_game_realm
+		place_by_pos* => place_by_pos*
+	pos? /number
+		0
+		0
+	angle? 0
+	move_speed_track? 0
+	move_speed_side? 0
+	move_speed_track_max? 1
+	move_speed_side_max? 1
+	turn_speed? 0
+	turn_speed_max? 0.05
+	turn_left? false
+	turn_right? false
+	move_forward? false
+	move_backward? false
+	move_right? false
+	move_left? false
+	tick null
+
+$mol_canvas $mol_view
+	dom_name \canvas
+	context CanvasRenderingContext2D
+	attr *
+		^
+		width <= width 400
+		height <= height 300
+	paint null
+
+$hyoo_game_eye $mol_canvas
+	perspective 25000
+	fov 60
+	Realm $hyoo_game_realm
+		map_rows => map_rows
+		map_width => map_width
+		map_height => map_height
+		wall_size => wall_size
+	pos? /number
+		0
+		0
+	angle? 1
+	width 0
+	height 0
+	height_half 0
+	place_skins *
+		@ /string
+			\hyoo/game/arcade/texture/meme/1.jpg
+			\hyoo/game/arcade/texture/meme/2.jpg
+			\hyoo/game/arcade/texture/meme/3.jpg
+			\hyoo/game/arcade/texture/meme/4.jpg
+			\hyoo/game/arcade/texture/meme/5.jpg
+			\hyoo/game/arcade/texture/meme/6.jpg
+			\hyoo/game/arcade/texture/meme/7.jpg
+			\hyoo/game/arcade/texture/meme/8.jpg
+			\hyoo/game/arcade/texture/meme/9.jpg
+			\hyoo/game/arcade/texture/meme/10.jpg
+			\hyoo/game/arcade/texture/meme/11.jpg
+			\hyoo/game/arcade/texture/meme/12.jpg
+			\hyoo/game/arcade/texture/meme/13.jpg
+			\hyoo/game/arcade/texture/meme/14.jpg
+			\hyoo/game/arcade/texture/meme/15.jpg
+			\hyoo/game/arcade/texture/meme/16.jpg
+			\hyoo/game/arcade/texture/meme/17.jpg
+			\hyoo/game/arcade/texture/meme/18.jpg
+		- # /string
+			\hyoo/game/arcade/texture/skinface.jpg
+		- . /string
+			\hyoo/game/arcade/texture/skinface.jpg
+			
+
+$mol_keyboard_state $mol_plugin
+	event *
+		^
+		keydown? <=> down? null
+		keyup? <=> up? null
+	key *
+
+$hyoo_game_arcade $mol_stack
+	map \
+		\##....#@#....##
+		\#.............#
+		\...............
+		\...#@#...#@#...
+		\...@.@...@.@...
+		\...#@#...#@#...
+		\#.............#
+		\@.............@
+		\#.............#
+		\...#@#...#@#...
+		\...@.@...@.@...
+		\...#@#...#@#...
+		\...............
+		\#.............#
+		\##....#@#....##
+	place_skins *
+		@ /string
+			\hyoo/game/arcade/texture/meme/1.jpg
+			\hyoo/game/arcade/texture/meme/2.jpg
+			\hyoo/game/arcade/texture/meme/3.jpg
+			\hyoo/game/arcade/texture/meme/4.jpg
+			\hyoo/game/arcade/texture/meme/5.jpg
+			\hyoo/game/arcade/texture/meme/6.jpg
+			\hyoo/game/arcade/texture/meme/7.jpg
+			\hyoo/game/arcade/texture/meme/8.jpg
+			\hyoo/game/arcade/texture/meme/9.jpg
+			\hyoo/game/arcade/texture/meme/10.jpg
+			\hyoo/game/arcade/texture/meme/11.jpg
+			\hyoo/game/arcade/texture/meme/12.jpg
+			\hyoo/game/arcade/texture/meme/13.jpg
+			\hyoo/game/arcade/texture/meme/14.jpg
+			\hyoo/game/arcade/texture/meme/15.jpg
+			\hyoo/game/arcade/texture/meme/16.jpg
+			\hyoo/game/arcade/texture/meme/17.jpg
+			\hyoo/game/arcade/texture/meme/18.jpg
+		- # /string
+			\hyoo/game/arcade/texture/skinface.jpg
+		- . /string
+			\hyoo/game/arcade/texture/skinface.jpg
+	Realm $hyoo_game_realm
+		map <= map
+		spawn_pos => spawn_pos
+	guy_pos? /
+		^ spawn_pos
+	Guy $hyoo_game_actor
+		Realm <= Realm
+		pos? <=> guy_pos?
+		turn_left? => turn_left?
+		turn_right? => turn_right?
+		move_forward? => move_forward?
+		move_backward? => move_backward?
+		move_left? => move_left?
+		move_right? => move_right?
+		angle => guy_angle
+		tick => guy_tick
+	sub /
+		<= Guy_eye $hyoo_game_eye
+			Realm <= Realm
+			pos <= guy_pos
+			angle <= guy_angle
+			place_skins <= place_skins
+	plugins /
+		<= Control $mol_keyboard_state
+			key *
+				W? <=> move_forward?
+				A? <=> move_left?
+				S? <=> move_backward?
+				D? <=> move_right?
+				Q? <=> turn_left?
+				E? <=> turn_right?
+				up? <=> move_forward?
+				left? <=> turn_left?
+				down? <=> move_backward?
+				right? <=> turn_right?
+				pageUp? <=> move_left?
+				pageDown? <=> move_right?
+	auto /
+		<= guy_tick

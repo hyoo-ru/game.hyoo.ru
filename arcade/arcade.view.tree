@@ -1,4 +1,7 @@
 $hyoo_game_arcade $mol_stack
+	attr *
+		^
+		mol_theme \$mol_theme_light
 	map \
 		\##....#@#....##
 		\#.............#
@@ -61,6 +64,11 @@ $hyoo_game_arcade $mol_stack
 			pos <= guy_pos
 			angle <= guy_angle
 			place_skins <= place_skins
+		<= Hud $mol_page
+			title <= title
+			tools /
+				<= Sources $mol_link_source
+					uri \https://github.com/hyoo-ru/game.hyoo.ru
 	plugins /
 		<= Control $mol_keyboard_state
 			key *

@@ -1,4 +1,5 @@
 
+include \/mol/offline/install
 deploy \/hyoo/game/arcade/texture/skinface.jpg
 deploy \/hyoo/game/arcade/texture/meme/1.jpg
 deploy \/hyoo/game/arcade/texture/meme/2.jpg

@@ -1,15 +1,5 @@
 namespace $.$$ {
 	
-	function radians(angle: number) {
-		return angle * (Math.PI / 180);
-	}
-	
-	const tload = ( src: string )=> new Promise< HTMLImageElement >( done => {
-		const texture = new Image
-		texture.src = src
-		texture.onload = ()=> done( texture )
-	} )
-	
 	export class $hyoo_game_eye extends $.$hyoo_game_eye {
 		
 		width() {
@@ -109,7 +99,7 @@ namespace $.$$ {
 		
 		ray( a: number ) {
 			
-			const max_d = Math.tan(radians(this.fov() / 2));
+			const max_d = Math.tan( this.fov() * Math.PI / 360 );
 			const step = max_d * 2 / this.width();
 			const d = -max_d + (a + 0.5) * step;
 			const ray_angle = Math.atan2(d, 1);

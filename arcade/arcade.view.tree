@@ -1,0 +1,80 @@
+$hyoo_game_arcade $mol_stack
+	map \
+		\##....#@#....##
+		\#.............#
+		\...............
+		\...#@#...#@#...
+		\...@.@...@.@...
+		\...#@#...#@#...
+		\#.............#
+		\@.............@
+		\#.............#
+		\...#@#...#@#...
+		\...@.@...@.@...
+		\...#@#...#@#...
+		\...............
+		\#.............#
+		\##....#@#....##
+	place_skins *
+		@ /string
+			\hyoo/game/arcade/texture/meme/1.jpg
+			\hyoo/game/arcade/texture/meme/2.jpg
+			\hyoo/game/arcade/texture/meme/3.jpg
+			\hyoo/game/arcade/texture/meme/4.jpg
+			\hyoo/game/arcade/texture/meme/5.jpg
+			\hyoo/game/arcade/texture/meme/6.jpg
+			\hyoo/game/arcade/texture/meme/7.jpg
+			\hyoo/game/arcade/texture/meme/8.jpg
+			\hyoo/game/arcade/texture/meme/9.jpg
+			\hyoo/game/arcade/texture/meme/10.jpg
+			\hyoo/game/arcade/texture/meme/11.jpg
+			\hyoo/game/arcade/texture/meme/12.jpg
+			\hyoo/game/arcade/texture/meme/13.jpg
+			\hyoo/game/arcade/texture/meme/14.jpg
+			\hyoo/game/arcade/texture/meme/15.jpg
+			\hyoo/game/arcade/texture/meme/16.jpg
+			\hyoo/game/arcade/texture/meme/17.jpg
+			\hyoo/game/arcade/texture/meme/18.jpg
+		- # /string
+			\hyoo/game/arcade/texture/skinface.jpg
+		- . /string
+			\hyoo/game/arcade/texture/skinface.jpg
+	Realm $hyoo_game_realm
+		map <= map
+		spawn_pos => spawn_pos
+	guy_pos? /
+		^ spawn_pos
+	Guy $hyoo_game_actor
+		Realm <= Realm
+		pos? <=> guy_pos?
+		turn_left? => turn_left?
+		turn_right? => turn_right?
+		move_forward? => move_forward?
+		move_backward? => move_backward?
+		move_left? => move_left?
+		move_right? => move_right?
+		angle => guy_angle
+		tick => guy_tick
+	sub /
+		<= Guy_eye $hyoo_game_eye
+			Realm <= Realm
+			pos <= guy_pos
+			angle <= guy_angle
+			place_skins <= place_skins
+	plugins /
+		<= Control $mol_keyboard_state
+			key *
+				W? <=> move_forward?
+				A? <=> move_left?
+				S? <=> move_backward?
+				D? <=> move_right?
+				Q? <=> turn_left?
+				E? <=> turn_right?
+				up? <=> move_forward?
+				left? <=> turn_left?
+				down? <=> move_backward?
+				right? <=> turn_right?
+				pageUp? <=> move_left?
+				pageDown? <=> move_right?
+	auto /
+		<= guy_tick

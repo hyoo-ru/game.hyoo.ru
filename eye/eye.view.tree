@@ -14,27 +14,3 @@ $hyoo_game_eye $mol_canvas
 	height 0
 	height_half 0
 	place_skins *
-		@ /string
-			\hyoo/game/arcade/texture/meme/1.jpg
-			\hyoo/game/arcade/texture/meme/2.jpg
-			\hyoo/game/arcade/texture/meme/3.jpg
-			\hyoo/game/arcade/texture/meme/4.jpg
-			\hyoo/game/arcade/texture/meme/5.jpg
-			\hyoo/game/arcade/texture/meme/6.jpg
-			\hyoo/game/arcade/texture/meme/7.jpg
-			\hyoo/game/arcade/texture/meme/8.jpg
-			\hyoo/game/arcade/texture/meme/9.jpg
-			\hyoo/game/arcade/texture/meme/10.jpg
-			\hyoo/game/arcade/texture/meme/11.jpg
-			\hyoo/game/arcade/texture/meme/12.jpg
-			\hyoo/game/arcade/texture/meme/13.jpg
-			\hyoo/game/arcade/texture/meme/14.jpg
-			\hyoo/game/arcade/texture/meme/15.jpg
-			\hyoo/game/arcade/texture/meme/16.jpg
-			\hyoo/game/arcade/texture/meme/17.jpg
-			\hyoo/game/arcade/texture/meme/18.jpg
-		- # /string
-			\hyoo/game/arcade/texture/skinface.jpg
-		- . /string
-			\hyoo/game/arcade/texture/skinface.jpg
-			

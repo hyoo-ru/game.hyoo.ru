@@ -3391,6 +3391,9 @@ var $;
     (function ($$) {
         $mol_style_define($hyoo_game_eye, {
             imageRendering: 'pixelated',
+            background: {
+                image: [['linear-gradient(to bottom, skyblue, black, coral)']],
+            },
         });
     })($$ = $.$$ || ($.$$ = {}));
 })($ || ($ = {}));
@@ -3436,10 +3439,7 @@ var $;
                     'd': 1,
                     'u': 1,
                 };
-                context.fillStyle = `skyblue`;
-                context.fillRect(0, 0, width, height / 2);
-                context.fillStyle = `coral`;
-                context.fillRect(0, height / 2, width, height);
+                context.clearRect(0, 0, width, height);
                 for (let a = 0; a < width; ++a) {
                     const { angle, place_coord, place_kind, place_side, x: tx, y: ty } = this.ray(a);
                     const plank_height = Math.round(perspective / angle) / 2;

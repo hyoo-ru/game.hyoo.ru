@@ -46,11 +46,7 @@ namespace $.$$ {
 				'u': 1,
 			}
 			
-			context.fillStyle = `skyblue`
-			context.fillRect( 0, 0, width, height / 2 )
-			
-			context.fillStyle = `coral`
-			context.fillRect( 0, height / 2, width, height )
+			context.clearRect( 0, 0, width, height )
 			
 			for( let a=0;a < width; ++a ) {
 				

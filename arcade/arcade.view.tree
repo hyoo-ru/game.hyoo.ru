@@ -73,11 +73,11 @@ $hyoo_game_arcade $mol_stack
 						shape <= Square_big
 						texture <= Floor_image $mol_3d_image
 							uri \hyoo/game/arcade/texture/ground.jpg
-						transform <= floor_trans $mol_3d_matrix
+						transform <= floor_trans $mol_3d_mat4
 					<= Ceil $mol_3d_object
 						shape <= Square_big
 						texture <= Floor_image
-						transform <= ceil_trans $mol_3d_matrix
+						transform <= ceil_trans $mol_3d_mat4
 					^ walls /$mol_3d_object
 		<= Hud $mol_page
 			title <= title \$hyoo_game_arcade
@@ -115,4 +115,4 @@ $hyoo_game_arcade $mol_stack
 	Wall* $mol_3d_object
 		shape <= Square
 		texture <= wall_image* $mol_3d_image
-		transform <= wall_trans* $mol_3d_matrix
+		transform <= wall_trans* $mol_3d_mat4

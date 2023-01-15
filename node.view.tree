@@ -268,12 +268,12 @@ $hyoo_game_arcade $mol_stack
 				wireframe <= wireframe
 				objects /$mol_3d_object
 					<= Floor $mol_3d_object
-						shape <= Square_big
+						shape <= Square
 						texture <= Floor_image $mol_3d_image
 							uri \hyoo/game/arcade/texture/ground.jpg
 						transform <= floor_trans $mol_3d_mat4
 					<= Ceil $mol_3d_object
-						shape <= Square_big
+						shape <= Square
 						texture <= Floor_image
 						transform <= ceil_trans $mol_3d_mat4
 					^ walls
@@ -306,8 +306,6 @@ $hyoo_game_arcade $mol_stack
 		<= guy_tick
 	-
 	Square $mol_3d_shape_square
-	Square_big $mol_3d_shape_square
-		skin <= square_big_skin Float32Array
 	Image* $mol_3d_image
 		uri <= image_uri* \
 	walls /$mol_3d_object

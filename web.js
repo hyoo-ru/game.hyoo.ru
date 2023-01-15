@@ -3181,11 +3181,13 @@ var $;
         send_multi(data) {
             this.api.bindTexture(this.api.TEXTURE_2D_ARRAY, this.native);
             const size = data[0].width;
-            const levels = Math.ceil(Math.log2(size));
-            this.api.texStorage3D(this.api.TEXTURE_2D_ARRAY, levels, this.api.RGBA8, size, size, data.length);
+            this.api.texImage3D(this.api.TEXTURE_2D_ARRAY, 0, this.api.RGBA, size, size, data.length, 0, this.api.RGBA, this.api.UNSIGNED_BYTE, null);
             for (let i = 0; i < data.length; ++i) {
                 this.api.texSubImage3D(this.api.TEXTURE_2D_ARRAY, 0, 0, 0, i, size, size, 1, this.api.RGBA, this.api.UNSIGNED_BYTE, data[i]);
             }
+            const anisotropic = this.api.getExtension('EXT_texture_filter_anisotropic');
+            const max = this.api.getParameter(anisotropic.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+            this.api.texParameterf(this.api.TEXTURE_2D_ARRAY, anisotropic.TEXTURE_MAX_ANISOTROPY_EXT, max);
             this.api.texParameteri(this.api.TEXTURE_2D_ARRAY, this.api.TEXTURE_MIN_FILTER, this.api.LINEAR_MIPMAP_LINEAR);
             this.api.texParameteri(this.api.TEXTURE_2D_ARRAY, this.api.TEXTURE_MAG_FILTER, this.api.LINEAR);
             this.api.generateMipmap(this.api.TEXTURE_2D_ARRAY);
@@ -3777,6 +3779,7 @@ var $;
                         view_pos: 'vec4',
                         texture_id: 'float',
                         texture_pos: 'vec2',
+                        texture_scale: 'vec2',
                         instance_id: 'float',
                         vertex_id: 'float',
                     },
@@ -3794,15 +3797,23 @@ var $;
 					texture_pos = vertex_tex_pos;
 					instance_id = float(gl_InstanceID);
 					vertex_id = float(gl_VertexID);
+					
+					texture_scale = 2.0 * vec2(
+						length(inst_trans[0]),
+						length(inst_trans[1])
+					);
+					
 				}
 				
 			`, `
 				void main() {
-					float dim = 1.0 + view_pos.z / 8.0;
+					float dim = min( 1.0, 3.0 / pow( length( view_pos ), 2.0 ) );
 					if( wireframe == 1.0 ) {
-						color = vec4( dim, dim, dim, dim );
+						color = dim * vec4( 1, 1, 1, 1 );
 					} else {
-						color = texture( Texture, vec3( texture_pos, round(texture_id) ) ) * dim;
+						vec3 coord = vec3( texture_pos * texture_scale, round(texture_id) );
+						color = texture( Texture, coord );
+						color = vec4( color.rgb * dim, color.a );
 					}
 				}
 			`);
@@ -3811,7 +3822,7 @@ var $;
                 let aspect = this.width() / this.height();
                 if (!Number.isFinite(aspect))
                     aspect = 1;
-                return $mol_3d_mat4.perspective(Math.PI / 2, aspect, 0.0001, 10);
+                return $mol_3d_mat4.perspective(Math.PI / 2, aspect, 0.0001, 50);
             }
             view_matrix() {
                 const [sx, sy] = this.Realm().spawn_pos();
@@ -6067,11 +6078,6 @@ var $;
             const obj = new this.$.$mol_3d_shape_square();
             return obj;
         }
-        Square_big() {
-            const obj = new this.$.$mol_3d_shape_square();
-            obj.skin = () => this.square_big_skin();
-            return obj;
-        }
         Image(id) {
             const obj = new this.$.$mol_3d_image();
             obj.uri = () => this.image_uri(id);
@@ -6098,7 +6104,7 @@ var $;
         }
         Floor() {
             const obj = new this.$.$mol_3d_object();
-            obj.shape = () => this.Square_big();
+            obj.shape = () => this.Square();
             obj.texture = () => this.Floor_image();
             obj.transform = () => this.floor_trans();
             return obj;
@@ -6109,7 +6115,7 @@ var $;
         }
         Ceil() {
             const obj = new this.$.$mol_3d_object();
-            obj.shape = () => this.Square_big();
+            obj.shape = () => this.Square();
             obj.texture = () => this.Floor_image();
             obj.transform = () => this.ceil_trans();
             return obj;
@@ -6186,10 +6192,6 @@ var $;
             });
             return obj;
         }
-        square_big_skin() {
-            const obj = new this.$.Float32Array();
-            return obj;
-        }
         image_uri(id) {
             return "";
         }
@@ -6214,9 +6216,6 @@ var $;
     __decorate([
         $mol_mem
     ], $hyoo_game_arcade.prototype, "Square", null);
-    __decorate([
-        $mol_mem
-    ], $hyoo_game_arcade.prototype, "Square_big", null);
     __decorate([
         $mol_mem_key
     ], $hyoo_game_arcade.prototype, "Image", null);
@@ -6259,9 +6258,6 @@ var $;
     __decorate([
         $mol_mem
     ], $hyoo_game_arcade.prototype, "Control", null);
-    __decorate([
-        $mol_mem
-    ], $hyoo_game_arcade.prototype, "square_big_skin", null);
     __decorate([
         $mol_mem_key
     ], $hyoo_game_arcade.prototype, "wall_image", null);

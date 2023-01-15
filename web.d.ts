@@ -1060,6 +1060,7 @@ declare namespace $.$$ {
                 view_pos: "vec4";
                 texture_id: "float";
                 texture_pos: "vec2";
+                texture_scale: "vec2";
                 instance_id: "float";
                 vertex_id: "float";
             };
@@ -1839,7 +1840,6 @@ declare namespace $ {
         plugins(): readonly any[];
         auto(): readonly any[];
         Square(): $mol_3d_shape_square;
-        Square_big(): $mol_3d_shape_square;
         Image(id: any): $mol_3d_image;
         walls(): readonly $mol_3d_object[];
         Wall(id: any): $mol_3d_object;
@@ -1857,7 +1857,6 @@ declare namespace $ {
         stat(): string;
         Hud(): $mol_page;
         Control(): $$.$mol_keyboard_state;
-        square_big_skin(): Float32Array;
         image_uri(id: any): string;
         wall_image(id: any): $mol_3d_image;
         wall_trans(id: any): $mol_3d_mat4;

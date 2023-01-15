@@ -2,7 +2,12 @@ namespace $.$$ {
 	
 	$mol_style_define( $hyoo_game_arcade, {
 		
-		Guy_eye: {
+		View: {
+			alignSelf: 'stretch',
+			justifySelf: 'stretch',
+		},
+		
+		Hud: {
 			alignSelf: 'stretch',
 			justifySelf: 'stretch',
 		},

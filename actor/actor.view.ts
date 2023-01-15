@@ -32,14 +32,16 @@ namespace $.$$ {
 			const angle = this.angle()
 			const [ x, y ] = this.pos()
 			
-			const rx = x + Math.cos( angle ) * move_speed_track - Math.sin( angle ) * move_speed_side
-			const ry = y + Math.sin( angle ) * move_speed_track + Math.cos( angle ) * move_speed_side
+			const rx = x + Math.cos( angle ) * move_speed_side + Math.sin( angle ) * move_speed_track
+			const ry = y + Math.sin( angle ) * move_speed_side - Math.cos( angle ) * move_speed_track
 			
-			if( this.place_by_pos([ rx, ry ]) === '.' ) {
+			if( this.place_by_pos([ x, y ]) !== '⚫' ) {
 				this.pos([ rx, ry ])
-			} else if( this.place_by_pos([ x, ry ]) === '.' ) {
+			} else if( this.place_by_pos([ rx, ry ]) === '⚫' ) {
+				this.pos([ rx, ry ])
+			} else if( this.place_by_pos([ x, ry ]) === '⚫' ) {
 				this.pos([ x, ry ])
-			} else if( this.place_by_pos([ rx, y ]) === '.' ) {
+			} else if( this.place_by_pos([ rx, y ]) === '⚫' ) {
 				this.pos([ rx, y ])
 			}
 			

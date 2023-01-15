@@ -1,25 +1,24 @@
 $hyoo_game_arcade $mol_stack
-	attr *
-		^
-		mol_theme \$mol_theme_light
 	map \
-		\##....#@#....##
-		\#.............#
-		\...............
-		\...#@#...#@#...
-		\...@.@...@.@...
-		\...#@#...#@#...
-		\#.............#
-		\@.............@
-		\#.............#
-		\...#@#...#@#...
-		\...@.@...@.@...
-		\...#@#...#@#...
-		\...............
-		\#.............#
-		\##....#@#....##
+		\🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
+		\🛑🛑🟦⚫⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫⚫🟦🛑🛑
+		\🛑🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🛑
+		\🛑⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🛑
+		\🛑⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🟦🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🛑
+		\🛑⚫⚫⚫🎨🟦🎨⚫⚫⚫🎨🟦🎨⚫⚫⚫🟦🟦🟦⚫⚫⚫🎨🟦🎨⚫⚫⚫🎨🟦🎨⚫⚫⚫🛑
+		\🛑⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🟦🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🛑
+		\🛑🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🟦🟦🟦🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🛑
+		\🛑🎨⚫⚫⚫⚫⚫⚫🔼⚫⚫⚫⚫⚫⚫🎨🟦🟦🟦🎨⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🎨🛑
+		\🛑🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🟦🟦🟦🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🛑
+		\🛑⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🟦🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🛑
+		\🛑⚫⚫⚫🎨🟦🎨⚫⚫⚫🎨🟦🎨⚫⚫⚫🟦🟦🟦⚫⚫⚫🎨🟦🎨⚫⚫⚫🎨🟦🎨⚫⚫⚫🛑
+		\🛑⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🟦🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🛑
+		\🛑⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🛑
+		\🛑🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🛑
+		\🛑🛑🟦⚫⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫⚫🟦🛑🛑
+		\🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
 	place_skins *
-		@ /string
+		🎨 /string
 			\hyoo/game/arcade/texture/meme/1.jpg
 			\hyoo/game/arcade/texture/meme/2.jpg
 			\hyoo/game/arcade/texture/meme/3.jpg
@@ -38,13 +37,17 @@ $hyoo_game_arcade $mol_stack
 			\hyoo/game/arcade/texture/meme/16.jpg
 			\hyoo/game/arcade/texture/meme/17.jpg
 			\hyoo/game/arcade/texture/meme/18.jpg
-		- # /string
-			\hyoo/game/arcade/texture/skinface.jpg
-		- . /string
-			\hyoo/game/arcade/texture/skinface.jpg
+		🟦 /string
+			\hyoo/game/arcade/texture/wall/0.jpg
+			\hyoo/game/arcade/texture/wall/1.jpg
+		🛑 /string
+			\hyoo/game/arcade/texture/border.jpg
 	Realm $hyoo_game_realm
 		map <= map
 		spawn_pos => spawn_pos
+		map_rows => map_rows
+		map_width => map_width
+		map_height => map_height
 	guy_pos? /
 		^ spawn_pos
 	Guy $hyoo_game_actor
@@ -59,16 +62,33 @@ $hyoo_game_arcade $mol_stack
 		angle => guy_angle
 		tick => guy_tick
 	sub /
-		<= Guy_eye $hyoo_game_eye
-			Realm <= Realm
-			pos <= guy_pos
-			angle <= guy_angle
-			place_skins <= place_skins
+		<= View $mol_view sub /
+			<= Guy_eye $hyoo_game_eye
+				Realm <= Realm
+				pos <= guy_pos
+				angle <= guy_angle
+				wireframe <= wireframe
+				objects /$mol_3d_object
+					<= Floor $mol_3d_object
+						shape <= Square_big
+						texture <= Floor_image $mol_3d_image
+							uri \hyoo/game/arcade/texture/ground.jpg
+						transform <= floor_trans $mol_3d_matrix
+					<= Ceil $mol_3d_object
+						shape <= Square_big
+						texture <= Floor_image
+						transform <= ceil_trans $mol_3d_matrix
+					^ walls /$mol_3d_object
 		<= Hud $mol_page
-			title <= title
+			title <= title \$hyoo_game_arcade
 			tools /
+				<= Wireframe $mol_check_box
+					title \Wireframe
+					checked? <=> wireframe? false
 				<= Sources $mol_link_source
 					uri \https://github.com/hyoo-ru/game.hyoo.ru
+			foot /
+				<= stat \
 	plugins /
 		<= Control $mol_keyboard_state
 			key *
@@ -86,3 +106,13 @@ $hyoo_game_arcade $mol_stack
 				pageDown? <=> move_right?
 	auto /
 		<= guy_tick
+	-
+	Square $mol_3d_shape_square
+	Square_big $mol_3d_shape_square
+		skin <= square_big_skin Float32Array
+	Image* $mol_3d_image
+		uri <= image_uri* \
+	Wall* $mol_3d_object
+		shape <= Square
+		texture <= wall_image* $mol_3d_image
+		transform <= wall_trans* $mol_3d_matrix

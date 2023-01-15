@@ -3,7 +3,9 @@ namespace $.$$ {
 		
 		@ $mol_mem
 		map_rows() {
-			return this.map().split( '\n' )
+			return this.map().split( '\n' ).map(
+				row => [ ... row ].map( p => p === '🔼' ? '⚫' : p )
+			)
 		}
 		
 		@ $mol_mem
@@ -16,18 +18,15 @@ namespace $.$$ {
 			return this.map_rows().length
 		}
 			  
-		coord_by_pos( [ px, py ]: number[] ) {
+		coord_by_pos( [ px, py ]: readonly number[] ) {
 			return [
-				Math.floor( py / this.wall_size() ),
-				Math.floor( px / this.wall_size() ),
+				Math.floor( px ),
+				Math.floor( py ),
 			]
 		}
 		
 		pos_by_coord( [ cx, cy ]: number[] ) {
-			return [
-				( cx + .5 ) * this.wall_size(),
-				( cy + .5 ) * this.wall_size(),
-			]
+			return [ cx + .5, cy + .5 ]
 		}
 		
 		place_by_pos( [ px, py ]: number[] ) {
@@ -37,8 +36,8 @@ namespace $.$$ {
 		
 		spawn_pos() {
 			return [
-				this.map_width() / 2 * this.wall_size(),
-				this.map_height() / 2 * this.wall_size(),
+				this.map_width() / 2,
+				this.map_height() / 2,
 			]
 		}
 		

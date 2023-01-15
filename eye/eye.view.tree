@@ -1,16 +1,8 @@
-$hyoo_game_eye $mol_canvas
-	perspective 25000
-	fov 60
+$hyoo_game_eye $mol_3d_pane
+	objects /$mol_3d_object
 	Realm $hyoo_game_realm
-		map_rows => map_rows
-		map_width => map_width
-		map_height => map_height
-		wall_size => wall_size
 	pos? /number
 		0
 		0
 	angle? 1
-	width 0
-	height 0
-	height_half 0
-	place_skins *
+	wireframe false

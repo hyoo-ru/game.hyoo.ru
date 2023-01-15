@@ -78,7 +78,7 @@ $hyoo_game_arcade $mol_stack
 						shape <= Square_big
 						texture <= Floor_image
 						transform <= ceil_trans $mol_3d_mat4
-					^ walls /$mol_3d_object
+					^ walls
 		<= Hud $mol_page
 			title <= title \$hyoo_game_arcade
 			tools /
@@ -112,6 +112,7 @@ $hyoo_game_arcade $mol_stack
 		skin <= square_big_skin Float32Array
 	Image* $mol_3d_image
 		uri <= image_uri* \
+	walls /$mol_3d_object
 	Wall* $mol_3d_object
 		shape <= Square
 		texture <= wall_image* $mol_3d_image

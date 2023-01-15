@@ -5,7 +5,6 @@ namespace $.$$ {
 		stat() {
 			return [
 				`pos: ${ this.guy_pos().map( v => v.toFixed(3) ).join( ' x ' ) }`,
-				`coord: ${ this.Realm().coord_by_pos( this.guy_pos() ).map( v => v.toFixed(3) ).join( ' x ' ) }`,
 				`angle: ${ this.guy_angle().toFixed(3) }`,
 				`objects: ${ this.Guy_eye().objects().length }`,
 				`shapes: ${ this.Guy_eye().groups().size }`,

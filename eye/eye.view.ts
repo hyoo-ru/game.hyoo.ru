@@ -74,7 +74,8 @@ namespace $.$$ {
 		@ $mol_mem
 		view_matrix() {
 			
-			const [ sx, sy ] = this.Realm().spawn_pos()
+			const map_width = this.Realm().map_width()
+			const map_height = this.Realm().map_height()
 			const [ x, y ] = this.pos()
 			const a = this.angle()
 			
@@ -82,7 +83,7 @@ namespace $.$$ {
 				$mol_3d_mat4.rotation( [ 1, 0, 0 ], - Math.PI / 2 ),
 				$mol_3d_mat4.rotation( [ 0, 0, 1 ], a ),
 				$mol_3d_mat4.scaling([ 1, 1, 1 ]),
-				$mol_3d_mat4.translation([ ( x - sx )/-1, ( y - sy )/1, .25 ]),
+				$mol_3d_mat4.translation([ -x + map_width/2, y - map_height/2, .25 ]),
 			)
 			
 		}

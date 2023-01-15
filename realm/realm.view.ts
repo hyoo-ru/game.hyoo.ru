@@ -4,7 +4,7 @@ namespace $.$$ {
 		@ $mol_mem
 		map_rows() {
 			return this.map().split( '\n' ).map(
-				row => [ ... row ].map( p => p === '🔼' ? '⚫' : p )
+				row => [ ... row ].map( p => p === '💫' ? '⚫' : p )
 			)
 		}
 		
@@ -34,11 +34,35 @@ namespace $.$$ {
 			return this.map_rows()[ cy ]?.[ cx ] ?? '%'
 		}
 		
+		@  $mol_mem
+		spawn_places() {
+			
+			const places = [] as { x: number, y: number }[]
+			const rows = this.map().split( '\n' )
+			
+			for( let y = 0; y < rows.length; ++ y ) {
+				const row = [ ... rows[y] ]
+				
+				for( let x = 0; x < row.length; ++ x ) {
+					if( row[x] !== '💫' ) continue
+					places.push({ x, y })
+				} 
+				
+			}
+			
+			return places
+		}
+		
+		@ $mol_mem
 		spawn_pos() {
+			
+			const place = $mol_array_lottery( this.spawn_places() )
+			
 			return [
-				this.map_width() / 2,
-				this.map_height() / 2,
+				place.x,
+				place.y,
 			]
+			
 		}
 		
 	}

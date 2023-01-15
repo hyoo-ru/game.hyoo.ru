@@ -2950,9 +2950,6 @@ var $;
 var $;
 (function ($) {
     class $hyoo_game_realm extends $mol_object2 {
-        wall_size() {
-            return 10;
-        }
         map() {
             return " ";
         }
@@ -2983,7 +2980,7 @@ var $;
     (function ($$) {
         class $hyoo_game_realm extends $.$hyoo_game_realm {
             map_rows() {
-                return this.map().split('\n');
+                return this.map().split('\n').map(row => [...row].map(p => p === '🔼' ? '⚫' : p));
             }
             map_width() {
                 return this.map_rows().reduce((max, row) => Math.max(max, row.length), 0);
@@ -2993,15 +2990,12 @@ var $;
             }
             coord_by_pos([px, py]) {
                 return [
-                    Math.floor(py / this.wall_size()),
-                    Math.floor(px / this.wall_size()),
+                    Math.floor(px),
+                    Math.floor(py),
                 ];
             }
             pos_by_coord([cx, cy]) {
-                return [
-                    (cx + .5) * this.wall_size(),
-                    (cy + .5) * this.wall_size(),
-                ];
+                return [cx + .5, cy + .5];
             }
             place_by_pos([px, py]) {
                 const [cx, cy] = this.coord_by_pos([px, py]);
@@ -3009,8 +3003,8 @@ var $;
             }
             spawn_pos() {
                 return [
-                    this.map_width() / 2 * this.wall_size(),
-                    this.map_height() / 2 * this.wall_size(),
+                    this.map_width() / 2,
+                    this.map_height() / 2,
                 ];
             }
         }
@@ -3065,12 +3059,12 @@ var $;
         move_speed_track_max(next) {
             if (next !== undefined)
                 return next;
-            return 1;
+            return 0.1;
         }
         move_speed_side_max(next) {
             if (next !== undefined)
                 return next;
-            return 1;
+            return 0.1;
         }
         turn_speed(next) {
             if (next !== undefined)
@@ -3225,15 +3219,18 @@ var $;
                 const move_speed_side = this.move_speed_side();
                 const angle = this.angle();
                 const [x, y] = this.pos();
-                const rx = x + Math.cos(angle) * move_speed_track - Math.sin(angle) * move_speed_side;
-                const ry = y + Math.sin(angle) * move_speed_track + Math.cos(angle) * move_speed_side;
-                if (this.place_by_pos([rx, ry]) === '.') {
+                const rx = x + Math.cos(angle) * move_speed_side + Math.sin(angle) * move_speed_track;
+                const ry = y + Math.sin(angle) * move_speed_side - Math.cos(angle) * move_speed_track;
+                if (this.place_by_pos([x, y]) !== '⚫') {
                     this.pos([rx, ry]);
                 }
-                else if (this.place_by_pos([x, ry]) === '.') {
+                else if (this.place_by_pos([rx, ry]) === '⚫') {
+                    this.pos([rx, ry]);
+                }
+                else if (this.place_by_pos([x, ry]) === '⚫') {
                     this.pos([x, ry]);
                 }
-                else if (this.place_by_pos([rx, y]) === '.') {
+                else if (this.place_by_pos([rx, y]) === '⚫') {
                     this.pos([rx, y]);
                 }
                 let turn_speed = this.turn_speed();
@@ -3262,17 +3259,739 @@ var $;
 "use strict";
 var $;
 (function ($) {
-    class $mol_canvas extends $mol_view {
+    class $mol_3d_shape extends $mol_object {
+        geometry() {
+            return new Float32Array;
+        }
+        size() {
+            return this.geometry().length / 3;
+        }
+        skin() {
+            return new Float32Array(this.size() * 2);
+        }
+    }
+    __decorate([
+        $mol_memo.method
+    ], $mol_3d_shape.prototype, "geometry", null);
+    __decorate([
+        $mol_memo.method
+    ], $mol_3d_shape.prototype, "skin", null);
+    $.$mol_3d_shape = $mol_3d_shape;
+    class $mol_3d_shape_triangle extends $mol_3d_shape {
+        geometry() {
+            return new Float32Array([
+                -1, -1, 0,
+                +1, -1, 0,
+                +0, +1, 0,
+            ]);
+        }
+        skin() {
+            return new Float32Array([
+                0.0, 1,
+                1.0, 1,
+                0.5, 0,
+            ]);
+        }
+    }
+    __decorate([
+        $mol_memo.method
+    ], $mol_3d_shape_triangle.prototype, "geometry", null);
+    __decorate([
+        $mol_memo.method
+    ], $mol_3d_shape_triangle.prototype, "skin", null);
+    $.$mol_3d_shape_triangle = $mol_3d_shape_triangle;
+    class $mol_3d_shape_square extends $mol_3d_shape {
+        geometry() {
+            return new Float32Array([
+                -1, -1, 0,
+                +1, -1, 0,
+                -1, +1, 0,
+                +1, +1, 0,
+            ]);
+        }
+        skin() {
+            return new Float32Array([
+                0, 1,
+                1, 1,
+                0, 0,
+                1, 0,
+            ]);
+        }
+    }
+    __decorate([
+        $mol_memo.method
+    ], $mol_3d_shape_square.prototype, "geometry", null);
+    __decorate([
+        $mol_memo.method
+    ], $mol_3d_shape_square.prototype, "skin", null);
+    $.$mol_3d_shape_square = $mol_3d_shape_square;
+})($ || ($ = {}));
+//mol/3d/shape/shape.ts
+;
+"use strict";
+var $;
+(function ($) {
+    function $mol_wire_sync(obj) {
+        return new Proxy(obj, {
+            get(obj, field) {
+                const val = obj[field];
+                if (typeof val !== 'function')
+                    return val;
+                const temp = $mol_wire_task.getter(val);
+                return function $mol_wire_sync(...args) {
+                    const fiber = temp(obj, args);
+                    return fiber.sync();
+                };
+            },
+            apply(obj, self, args) {
+                const temp = $mol_wire_task.getter(obj);
+                const fiber = temp(self, args);
+                return fiber.sync();
+            },
+        });
+    }
+    $.$mol_wire_sync = $mol_wire_sync;
+})($ || ($ = {}));
+//mol/wire/sync/sync.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_3d_image extends $mol_object {
+        uri() {
+            return 'about:blank';
+        }
+        load() {
+            return new Promise((done, fail) => {
+                const image = new Image;
+                image.src = this.uri();
+                image.onload = () => done(image);
+                image.onerror = event => fail(event);
+            });
+        }
+        data() {
+            $mol_wire_solid();
+            try {
+                return $mol_wire_sync(this).load();
+            }
+            catch (error) {
+                $mol_fail_log(error);
+                return new ImageData(new Uint8ClampedArray(512 * 512 * 4), 512, 512);
+            }
+        }
+    }
+    __decorate([
+        $mol_mem
+    ], $mol_3d_image.prototype, "data", null);
+    $.$mol_3d_image = $mol_3d_image;
+})($ || ($ = {}));
+//mol/3d/image/image.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_3d_mat4 extends Float32Array {
+        static identity() {
+            return new $mol_3d_mat4([
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1,
+            ]);
+        }
+        static translation([x, y, z]) {
+            return new $mol_3d_mat4([
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                x, y, z, 1,
+            ]);
+        }
+        static scaling([x, y, z]) {
+            return new $mol_3d_mat4([
+                x, 0, 0, 0,
+                0, y, 0, 0,
+                0, 0, z, 0,
+                0, 0, 0, 1,
+            ]);
+        }
+        static rotation([x, y, z], angle) {
+            var length = Math.hypot(x, y, z);
+            x /= length;
+            y /= length;
+            z /= length;
+            const xx = x ** 2;
+            const yy = y ** 2;
+            const zz = z ** 2;
+            var c = Math.cos(angle);
+            var s = Math.sin(angle);
+            const mc = 1 - c;
+            return new $mol_3d_mat4([
+                xx + (1 - xx) * c,
+                x * y * mc + z * s,
+                x * z * mc - y * s,
+                0,
+                x * y * mc - z * s,
+                yy + (1 - yy) * c,
+                y * z * mc + x * s,
+                0,
+                x * z * mc + y * s,
+                y * z * mc - x * s,
+                zz + (1 - zz) * c,
+                0,
+                0, 0, 0, 1,
+            ]);
+        }
+        static orthographic(left, right, bottom, top, near, far) {
+            const rpl = right + left;
+            const tpb = top + bottom;
+            const npf = near + far;
+            const rml = right - left;
+            const tmb = top - bottom;
+            const nmf = near - far;
+            return new $mol_3d_mat4([
+                2 / rml, 0, 0, 0,
+                0, 2 / tmb, 0, 0,
+                0, 0, 2 / nmf, 0,
+                -rpl / rml, -tpb / tmb, npf / nmf, 1,
+            ]);
+        }
+        static perspective(fov, aspect, near, far) {
+            var f = Math.tan(Math.PI / 2 - fov / 2);
+            var irange = 1.0 / (near - far);
+            return new $mol_3d_mat4([
+                f / aspect, 0, 0, 0,
+                0, f, 0, 0,
+                0, 0, (near + far) * irange, -1,
+                0, 0, near * far * irange * 2, 0,
+            ]);
+        }
+        static multiply(head, ...tail) {
+            if (tail.length === 0)
+                return new $mol_3d_mat4(head);
+            const foot = tail.length > 1 ? this.multiply(...tail) : tail[0];
+            return new $mol_3d_mat4([
+                foot[0] * head[0] + foot[1] * head[4] + foot[2] * head[8] + foot[3] * head[12],
+                foot[0] * head[1] + foot[1] * head[5] + foot[2] * head[9] + foot[3] * head[13],
+                foot[0] * head[2] + foot[1] * head[6] + foot[2] * head[10] + foot[3] * head[14],
+                foot[0] * head[3] + foot[1] * head[7] + foot[2] * head[11] + foot[3] * head[15],
+                foot[4] * head[0] + foot[5] * head[4] + foot[6] * head[8] + foot[7] * head[12],
+                foot[4] * head[1] + foot[5] * head[5] + foot[6] * head[9] + foot[7] * head[13],
+                foot[4] * head[2] + foot[5] * head[6] + foot[6] * head[10] + foot[7] * head[14],
+                foot[4] * head[3] + foot[5] * head[7] + foot[6] * head[11] + foot[7] * head[15],
+                foot[8] * head[0] + foot[9] * head[4] + foot[10] * head[8] + foot[11] * head[12],
+                foot[8] * head[1] + foot[9] * head[5] + foot[10] * head[9] + foot[11] * head[13],
+                foot[8] * head[2] + foot[9] * head[6] + foot[10] * head[10] + foot[11] * head[14],
+                foot[8] * head[3] + foot[9] * head[7] + foot[10] * head[11] + foot[11] * head[15],
+                foot[12] * head[0] + foot[13] * head[4] + foot[14] * head[8] + foot[15] * head[12],
+                foot[12] * head[1] + foot[13] * head[5] + foot[14] * head[9] + foot[15] * head[13],
+                foot[12] * head[2] + foot[13] * head[6] + foot[14] * head[10] + foot[15] * head[14],
+                foot[12] * head[3] + foot[13] * head[7] + foot[14] * head[11] + foot[15] * head[15],
+            ]);
+        }
+        inversed() {
+            const p_0 = this[10] * this[15], p_1 = this[14] * this[11], p_2 = this[6] * this[15], p_3 = this[14] * this[7];
+            const p_4 = this[6] * this[11], p_5 = this[10] * this[7], p_6 = this[2] * this[15], p_7 = this[14] * this[3];
+            const p_8 = this[2] * this[11], p_9 = this[10] * this[3], p10 = this[2] * this[7], p11 = this[6] * this[3];
+            const p12 = this[8] * this[13], p13 = this[12] * this[9], p14 = this[4] * this[13], p15 = this[12] * this[5];
+            const p16 = this[4] * this[9], p17 = this[8] * this[5], p18 = this[0] * this[13], p19 = this[12] * this[1];
+            const p20 = this[0] * this[9], p21 = this[8] * this[1], p22 = this[0] * this[5], p23 = this[4] * this[1];
+            const t0 = p_0 * this[5] + p_3 * this[9] + p_4 * this[13] - p_1 * this[5] - p_2 * this[9] - p_5 * this[13];
+            const t1 = p_1 * this[1] + p_6 * this[9] + p_9 * this[13] - p_0 * this[1] - p_7 * this[9] - p_8 * this[13];
+            const t2 = p_2 * this[1] + p_7 * this[5] + p10 * this[13] - p_3 * this[1] - p_6 * this[5] - p11 * this[13];
+            const t3 = p_5 * this[1] + p_8 * this[5] + p11 * this[9] - p_4 * this[1] - p_9 * this[5] - p10 * this[9];
+            const d = 1.0 / (this[0] * t0 + this[4] * t1 + this[8] * t2 + this[12] * t3);
+            return new $mol_3d_mat4([
+                d * t0, d * t1, d * t2, d * t3,
+                d * (p_1 * this[4] + p_2 * this[8] + p_5 * this[12] - p_0 * this[4] - p_3 * this[8] - p_4 * this[12]),
+                d * (p_0 * this[0] + p_7 * this[8] + p_8 * this[12] - p_1 * this[0] - p_6 * this[8] - p_9 * this[12]),
+                d * (p_3 * this[0] + p_6 * this[4] + p11 * this[12] - p_2 * this[0] - p_7 * this[4] - p10 * this[12]),
+                d * (p_4 * this[0] + p_9 * this[4] + p10 * this[8] - p_5 * this[0] - p_8 * this[4] - p11 * this[8]),
+                d * (p12 * this[7] + p15 * this[11] + p16 * this[15] - p13 * this[7] - p14 * this[11] - p17 * this[15]),
+                d * (p13 * this[3] + p18 * this[11] + p21 * this[15] - p12 * this[3] - p19 * this[11] - p20 * this[15]),
+                d * (p14 * this[3] + p19 * this[7] + p22 * this[15] - p15 * this[3] - p18 * this[7] - p23 * this[15]),
+                d * (p17 * this[3] + p20 * this[7] + p23 * this[11] - p16 * this[3] - p21 * this[7] - p22 * this[11]),
+                d * (p14 * this[10] + p17 * this[14] + p13 * this[6] - p16 * this[14] - p12 * this[6] - p15 * this[10]),
+                d * (p20 * this[14] + p12 * this[2] + p19 * this[10] - p18 * this[10] - p21 * this[14] - p13 * this[2]),
+                d * (p18 * this[6] + p23 * this[14] + p15 * this[2] - p22 * this[14] - p14 * this[2] - p19 * this[6]),
+                d * (p22 * this[10] + p16 * this[2] + p21 * this[6] - p20 * this[6] - p23 * this[10] - p17 * this[2]),
+            ]);
+        }
+    }
+    __decorate([
+        $mol_memo.method
+    ], $mol_3d_mat4.prototype, "inversed", null);
+    __decorate([
+        $mol_memo.method
+    ], $mol_3d_mat4, "identity", null);
+    $.$mol_3d_mat4 = $mol_3d_mat4;
+})($ || ($ = {}));
+//mol/3d/mat4/mat4.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_3d_object extends $mol_object {
+        shape() {
+            return $mol_3d_shape.make({});
+        }
+        texture() {
+            return $mol_3d_image.make({});
+        }
+        transform() {
+            return $mol_3d_mat4.identity();
+        }
+    }
+    __decorate([
+        $mol_memo.method
+    ], $mol_3d_object.prototype, "shape", null);
+    __decorate([
+        $mol_memo.method
+    ], $mol_3d_object.prototype, "texture", null);
+    __decorate([
+        $mol_memo.method
+    ], $mol_3d_object.prototype, "transform", null);
+    $.$mol_3d_object = $mol_3d_object;
+})($ || ($ = {}));
+//mol/3d/object/object.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_3d_texture extends $mol_object {
+        api;
+        native;
+        constructor(api, native = api.createTexture()) {
+            super();
+            this.api = api;
+            this.native = native;
+        }
+        destructor() {
+            this.api.deleteTexture(this.native);
+        }
+        fill(color) {
+            this.api.bindTexture(this.api.TEXTURE_2D, this.native);
+            this.api.texImage2D(this.api.TEXTURE_2D, 0, this.api.RGBA, 1, 1, 0, this.api.RGBA, this.api.UNSIGNED_BYTE, color);
+            return color;
+        }
+        send_one(data) {
+            this.api.bindTexture(this.api.TEXTURE_2D, this.native);
+            this.api.texImage2D(this.api.TEXTURE_2D, 0, this.api.RGBA, this.api.RGBA, this.api.UNSIGNED_BYTE, data);
+            this.api.texParameteri(this.api.TEXTURE_2D, this.api.TEXTURE_MIN_FILTER, this.api.LINEAR_MIPMAP_LINEAR);
+            this.api.texParameteri(this.api.TEXTURE_2D, this.api.TEXTURE_MAG_FILTER, this.api.LINEAR);
+            this.api.generateMipmap(this.api.TEXTURE_2D);
+            return data;
+        }
+        send_multi(data) {
+            this.api.bindTexture(this.api.TEXTURE_2D_ARRAY, this.native);
+            const size = data[0].width;
+            const levels = Math.ceil(Math.log2(size));
+            this.api.texStorage3D(this.api.TEXTURE_2D_ARRAY, levels, this.api.RGBA8, size, size, data.length);
+            for (let i = 0; i < data.length; ++i) {
+                this.api.texSubImage3D(this.api.TEXTURE_2D_ARRAY, 0, 0, 0, i, size, size, 1, this.api.RGBA, this.api.UNSIGNED_BYTE, data[i]);
+            }
+            this.api.texParameteri(this.api.TEXTURE_2D_ARRAY, this.api.TEXTURE_MIN_FILTER, this.api.LINEAR_MIPMAP_LINEAR);
+            this.api.texParameteri(this.api.TEXTURE_2D_ARRAY, this.api.TEXTURE_MAG_FILTER, this.api.LINEAR);
+            this.api.generateMipmap(this.api.TEXTURE_2D_ARRAY);
+            return data;
+        }
+    }
+    $.$mol_3d_texture = $mol_3d_texture;
+})($ || ($ = {}));
+//mol/3d/texture/texture.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_3d_glob extends Object {
+        api;
+        location;
+        constructor(api, location) {
+            super();
+            this.api = api;
+            this.location = location;
+        }
+        vector_int(data, offset = 0, length = data.length - offset) {
+            switch (length) {
+                case 4:
+                    this.api.uniform4iv(this.location, data, offset, length);
+                    break;
+                case 3:
+                    this.api.uniform3iv(this.location, data, offset, length);
+                    break;
+                case 2:
+                    this.api.uniform2iv(this.location, data, offset, length);
+                    break;
+                case 1:
+                    this.api.uniform1iv(this.location, data, offset, length);
+                    break;
+                default: throw new Error(`Wrong matrix data length (${length})`);
+            }
+            return data;
+        }
+        vector_uint(data, offset = 0, length = data.length - offset) {
+            switch (length) {
+                case 4:
+                    this.api.uniform4uiv(this.location, data, offset, length);
+                    break;
+                case 3:
+                    this.api.uniform3uiv(this.location, data, offset, length);
+                    break;
+                case 2:
+                    this.api.uniform2uiv(this.location, data, offset, length);
+                    break;
+                case 1:
+                    this.api.uniform1uiv(this.location, data, offset, length);
+                    break;
+                default: throw new Error(`Wrong matrix data length (${length})`);
+            }
+            return data;
+        }
+        vector_float(data, offset = 0, length = data.length - offset) {
+            switch (length) {
+                case 4:
+                    this.api.uniform4fv(this.location, data, offset, length);
+                    break;
+                case 3:
+                    this.api.uniform3fv(this.location, data, offset, length);
+                    break;
+                case 2:
+                    this.api.uniform2fv(this.location, data, offset, length);
+                    break;
+                case 1:
+                    this.api.uniform1fv(this.location, data, offset, length);
+                    break;
+                default: throw new Error(`Wrong matrix data length (${length})`);
+            }
+            return data;
+        }
+        matrix(data, transpose = false, offset = 0, length = data.length - offset) {
+            switch (length) {
+                case 16:
+                    this.api.uniformMatrix4fv(this.location, transpose, data, offset, length);
+                    break;
+                case 12:
+                    this.api.uniformMatrix4x3fv(this.location, transpose, data, offset, length);
+                    break;
+                case 9:
+                    this.api.uniformMatrix3fv(this.location, transpose, data, offset, length);
+                    break;
+                case 8:
+                    this.api.uniformMatrix4x2fv(this.location, transpose, data, offset, length);
+                    break;
+                case 6:
+                    this.api.uniformMatrix3x2fv(this.location, transpose, data, offset, length);
+                    break;
+                case 2:
+                    this.api.uniformMatrix2fv(this.location, transpose, data, offset, length);
+                    break;
+                default: throw new Error(`Wrong matrix data length (${length})`);
+            }
+            return data;
+        }
+        texture() {
+            return new $mol_3d_texture(this.api);
+        }
+    }
+    __decorate([
+        $mol_mem
+    ], $mol_3d_glob.prototype, "texture", null);
+    $.$mol_3d_glob = $mol_3d_glob;
+})($ || ($ = {}));
+//mol/3d/glob/glob.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_3d_buffer extends Object {
+        api;
+        native;
+        constructor(api, native) {
+            super();
+            this.api = api;
+            this.native = native;
+        }
+        send(data) {
+            this.api.bindBuffer(this.api.ARRAY_BUFFER, this.native);
+            const size = data.reduce((sum, buf) => sum + buf.byteLength, 0);
+            this.api.bufferData(this.api.ARRAY_BUFFER, size, this.api.DYNAMIC_DRAW);
+            let offset = 0;
+            for (let buf of data) {
+                this.api.bufferSubData(this.api.ARRAY_BUFFER, offset, buf, 0);
+                offset += buf.byteLength;
+            }
+            return data;
+        }
+    }
+    $.$mol_3d_buffer = $mol_3d_buffer;
+})($ || ($ = {}));
+//mol/3d/buffer/buffer.ts
+;
+"use strict";
+var $;
+(function ($) {
+    const float_size = 4;
+    class $mol_3d_param extends Object {
+        api;
+        location;
+        constructor(api, location) {
+            super();
+            this.api = api;
+            this.location = location;
+        }
+        vector(vals) {
+            const buffer = this.api.createBuffer();
+            this.api.bindBuffer(this.api.ARRAY_BUFFER, buffer);
+            this.api.enableVertexAttribArray(this.location);
+            this.api.vertexAttribPointer(this.location, vals, this.api.FLOAT, false, 0, 0);
+            return new $mol_3d_buffer(this.api, buffer);
+        }
+        vectors(vals) {
+            const buffer = this.api.createBuffer();
+            this.api.bindBuffer(this.api.ARRAY_BUFFER, buffer);
+            this.api.enableVertexAttribArray(this.location);
+            this.api.vertexAttribPointer(this.location, vals, this.api.FLOAT, false, 0, 0);
+            this.api.vertexAttribDivisor(this.location, 1);
+            return new $mol_3d_buffer(this.api, buffer);
+        }
+        vectors_byte(vals) {
+            const buffer = this.api.createBuffer();
+            this.api.bindBuffer(this.api.ARRAY_BUFFER, buffer);
+            this.api.enableVertexAttribArray(this.location);
+            this.api.vertexAttribPointer(this.location, vals, this.api.UNSIGNED_BYTE, false, 0, 0);
+            this.api.vertexAttribDivisor(this.location, 1);
+            return new $mol_3d_buffer(this.api, buffer);
+        }
+        vectors_uint(vals) {
+            const buffer = this.api.createBuffer();
+            this.api.bindBuffer(this.api.ARRAY_BUFFER, buffer);
+            this.api.enableVertexAttribArray(this.location);
+            this.api.vertexAttribPointer(this.location, vals, this.api.UNSIGNED_INT, false, 0, 0);
+            this.api.vertexAttribDivisor(this.location, 1);
+            return new $mol_3d_buffer(this.api, buffer);
+        }
+        matrix([cols, rows]) {
+            const matrix_size = rows * cols * float_size;
+            const buffer = this.api.createBuffer();
+            this.api.bindBuffer(this.api.ARRAY_BUFFER, buffer);
+            for (let row = 0; row < rows; ++row) {
+                const loc = this.location + row;
+                const offset = row * cols * float_size;
+                this.api.enableVertexAttribArray(loc);
+                this.api.vertexAttribPointer(loc, cols, this.api.FLOAT, false, matrix_size, offset);
+            }
+            return new $mol_3d_buffer(this.api, buffer);
+        }
+        matrices([cols, rows]) {
+            const matrix_size = rows * cols * float_size;
+            const buffer = this.api.createBuffer();
+            this.api.bindBuffer(this.api.ARRAY_BUFFER, buffer);
+            for (let row = 0; row < rows; ++row) {
+                const loc = this.location + row;
+                const offset = row * cols * float_size;
+                this.api.enableVertexAttribArray(loc);
+                this.api.vertexAttribPointer(loc, cols, this.api.FLOAT, false, matrix_size, offset);
+                this.api.vertexAttribDivisor(loc, 1);
+            }
+            return new $mol_3d_buffer(this.api, buffer);
+        }
+    }
+    __decorate([
+        $mol_mem_key
+    ], $mol_3d_param.prototype, "vector", null);
+    __decorate([
+        $mol_mem_key
+    ], $mol_3d_param.prototype, "vectors", null);
+    __decorate([
+        $mol_mem_key
+    ], $mol_3d_param.prototype, "vectors_byte", null);
+    __decorate([
+        $mol_mem_key
+    ], $mol_3d_param.prototype, "vectors_uint", null);
+    __decorate([
+        $mol_mem_key
+    ], $mol_3d_param.prototype, "matrix", null);
+    __decorate([
+        $mol_mem_key
+    ], $mol_3d_param.prototype, "matrices", null);
+    $.$mol_3d_param = $mol_3d_param;
+})($ || ($ = {}));
+//mol/3d/param/param.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_3d_geometry extends Object {
+        api;
+        vertexes;
+        constructor(api, vertexes = api.createVertexArray()) {
+            super();
+            this.api = api;
+            this.vertexes = vertexes;
+        }
+        destructor() {
+            this.api.deleteVertexArray(this.vertexes);
+        }
+        size = 0;
+        count = 1;
+        use(task) {
+            try {
+                this.api.bindVertexArray(this.vertexes);
+                task(this);
+                return this;
+            }
+            finally {
+                this.api.bindVertexArray(null);
+            }
+        }
+    }
+    $.$mol_3d_geometry = $mol_3d_geometry;
+})($ || ($ = {}));
+//mol/3d/geometry/geometry.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_3d_program extends Object {
+        api;
+        native;
+        constructor(api, native) {
+            api.enable(api.CULL_FACE);
+            api.enable(api.DEPTH_TEST);
+            api.enable(api.SCISSOR_TEST);
+            super();
+            this.api = api;
+            this.native = native;
+        }
+        glob(name) {
+            const location = this.api.getUniformLocation(this.native, name);
+            return new $mol_3d_glob(this.api, location);
+        }
+        param(name) {
+            const location = this.api.getAttribLocation(this.native, name);
+            if (location === -1)
+                return null;
+            return new $mol_3d_param(this.api, location);
+        }
+        geometry(id) {
+            return new $mol_3d_geometry(this.api);
+        }
+        use(task) {
+            try {
+                this.api.useProgram(this.native);
+                task(this);
+                return this;
+            }
+            finally {
+                this.api.useProgram(null);
+            }
+        }
+        point(size, offset = 0) {
+            this.api.drawArrays(this.api.POINTS, offset, size);
+        }
+        line(size, offset = 0) {
+            this.api.drawArrays(this.api.LINES, offset, size);
+        }
+        triangle(size, offset = 0) {
+            this.api.drawArrays(this.api.TRIANGLES, offset, size);
+        }
+        strip(size, offset = 0) {
+            this.api.drawArrays(this.api.TRIANGLE_STRIP, offset, size);
+        }
+        points(first, vertices, instances = 1) {
+            this.api.drawArraysInstanced(this.api.POINTS, first, vertices, instances);
+        }
+        lines(first, vertices, instances = 1) {
+            this.api.drawArraysInstanced(this.api.LINE_STRIP, first, vertices, instances);
+        }
+        strips(first, vertices, instances = 1) {
+            this.api.drawArraysInstanced(this.api.TRIANGLE_STRIP, first, vertices, instances);
+        }
+    }
+    __decorate([
+        $mol_mem_key
+    ], $mol_3d_program.prototype, "glob", null);
+    __decorate([
+        $mol_mem_key
+    ], $mol_3d_program.prototype, "geometry", null);
+    $.$mol_3d_program = $mol_3d_program;
+})($ || ($ = {}));
+//mol/3d/program/program.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_3d_context extends Object {
+        native;
+        constructor(native) {
+            super();
+            this.native = native;
+        }
+        shader(type, code) {
+            const gl = this.native;
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, code);
+            gl.compileShader(shader);
+            const ok = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+            if (ok)
+                return shader;
+            const log = gl.getShaderInfoLog(shader);
+            gl.deleteShader(shader);
+            throw new Error(String(log));
+        }
+        program(face, vertex, fragment) {
+            const gl = this.native;
+            const program = gl.createProgram();
+            const prefix = `#version 300 es
+				precision highp float;
+				precision highp sampler2D;
+				precision highp sampler2DArray;
+			`;
+            let revert = prefix;
+            let refrag = prefix;
+            for (const name in face.glob ?? {}) {
+                revert += `uniform ${face.glob[name]} ${name};\n`;
+                refrag += `uniform ${face.glob[name]} ${name};\n`;
+            }
+            for (const name in face.input ?? {}) {
+                revert += `in ${face.input[name]} ${name};\n`;
+            }
+            for (const name in face.pipe ?? {}) {
+                revert += `out ${face.pipe[name]} ${name};\n`;
+                refrag += `in ${face.pipe[name]} ${name};\n`;
+            }
+            for (const name in face.output ?? {}) {
+                refrag += `out ${face.output[name]} ${name};\n`;
+            }
+            gl.attachShader(program, this.shader(gl.VERTEX_SHADER, revert + vertex));
+            gl.attachShader(program, this.shader(gl.FRAGMENT_SHADER, refrag + fragment));
+            gl.linkProgram(program);
+            var ok = gl.getProgramParameter(program, gl.LINK_STATUS);
+            if (ok)
+                return new $mol_3d_program(this.native, program);
+            const log = gl.getProgramInfoLog(program);
+            gl.deleteProgram(program);
+            throw new Error(String(log));
+        }
+    }
+    $.$mol_3d_context = $mol_3d_context;
+})($ || ($ = {}));
+//mol/3d/context/context.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_3d_pane extends $mol_view {
         dom_name() {
             return "canvas";
         }
         context() {
-            const obj = new this.$.CanvasRenderingContext2D();
+            const obj = new this.$.$mol_3d_context(this.context_native());
             return obj;
         }
-        attr() {
+        field() {
             return {
-                ...super.attr(),
+                ...super.field(),
                 width: this.width(),
                 height: this.height()
             };
@@ -3280,63 +3999,104 @@ var $;
         paint() {
             return null;
         }
+        context_native() {
+            const obj = new this.$.WebGL2RenderingContext();
+            return obj;
+        }
         width() {
-            return 400;
+            return 0;
         }
         height() {
-            return 300;
+            return 0;
         }
     }
     __decorate([
         $mol_mem
-    ], $mol_canvas.prototype, "context", null);
-    $.$mol_canvas = $mol_canvas;
+    ], $mol_3d_pane.prototype, "context", null);
+    __decorate([
+        $mol_mem
+    ], $mol_3d_pane.prototype, "context_native", null);
+    $.$mol_3d_pane = $mol_3d_pane;
 })($ || ($ = {}));
-//mol/canvas/-view.tree/canvas.view.tree.ts
+//mol/3d/pane/-view.tree/pane.view.tree.ts
 ;
 "use strict";
 var $;
 (function ($) {
     var $$;
     (function ($$) {
-        class $mol_canvas extends $.$mol_canvas {
+        $mol_style_define($mol_3d_pane, {
+            alignSelf: 'stretch',
+            justifySelf: 'stretch',
+            flex: {
+                grow: 1,
+                shrink: 1,
+            },
+        });
+    })($$ = $.$$ || ($.$$ = {}));
+})($ || ($ = {}));
+//mol/3d/pane/pane.view.css.ts
+;
+"use strict";
+var $;
+(function ($) {
+    var $$;
+    (function ($$) {
+        class $mol_3d_pane extends $.$mol_3d_pane {
             context() {
-                return this.dom_node().getContext('2d');
+                const canvas = this.dom_node();
+                let context = canvas.getContext('webgl2');
+                return new $mol_3d_context(context);
+            }
+            width() {
+                return Math.ceil((this.view_rect()?.width ?? 0) * this.$.$mol_dom_context.devicePixelRatio);
+            }
+            height() {
+                return Math.ceil((this.view_rect()?.height ?? 0) * this.$.$mol_dom_context.devicePixelRatio);
+            }
+            viewport() {
+                const viewport = [0, 0, this.width(), this.height()];
+                this.context().native.viewport(...viewport);
+                return viewport;
+            }
+            scissor() {
+                const scissor = this.viewport();
+                this.context().native.scissor(...scissor);
+                return scissor;
             }
             render() {
                 super.render();
+                this.viewport();
+                this.scissor();
                 this.paint();
             }
         }
         __decorate([
             $mol_mem
-        ], $mol_canvas.prototype, "context", null);
-        $$.$mol_canvas = $mol_canvas;
+        ], $mol_3d_pane.prototype, "context", null);
+        __decorate([
+            $mol_mem
+        ], $mol_3d_pane.prototype, "width", null);
+        __decorate([
+            $mol_mem
+        ], $mol_3d_pane.prototype, "height", null);
+        __decorate([
+            $mol_mem
+        ], $mol_3d_pane.prototype, "viewport", null);
+        __decorate([
+            $mol_mem
+        ], $mol_3d_pane.prototype, "scissor", null);
+        $$.$mol_3d_pane = $mol_3d_pane;
     })($$ = $.$$ || ($.$$ = {}));
 })($ || ($ = {}));
-//mol/canvas/canvas.view.ts
+//mol/3d/pane/pane.view.ts
 ;
 "use strict";
 var $;
 (function ($) {
-    class $hyoo_game_eye extends $mol_canvas {
-        perspective() {
-            return 25000;
-        }
-        fov() {
-            return 60;
-        }
-        map_rows() {
-            return this.Realm().map_rows();
-        }
-        map_width() {
-            return this.Realm().map_width();
-        }
-        map_height() {
-            return this.Realm().map_height();
-        }
-        wall_size() {
-            return this.Realm().wall_size();
+    class $hyoo_game_eye extends $mol_3d_pane {
+        objects() {
+            return [];
         }
         Realm() {
             const obj = new this.$.$hyoo_game_realm();
@@ -3355,17 +4115,8 @@ var $;
                 return next;
             return 1;
         }
-        width() {
-            return 0;
-        }
-        height() {
-            return 0;
-        }
-        height_half() {
-            return 0;
-        }
-        place_skins() {
-            return {};
+        wireframe() {
+            return false;
         }
     }
     __decorate([
@@ -3384,27 +4135,26 @@ var $;
 "use strict";
 var $;
 (function ($) {
-    function $mol_array_lottery(list) {
-        return list[Math.floor(Math.random() * list.length)];
-    }
-    $.$mol_array_lottery = $mol_array_lottery;
-})($ || ($ = {}));
-//mol/array/lottery/lottery.ts
-;
-"use strict";
-var $;
-(function ($) {
-    var $$;
-    (function ($$) {
-        $mol_style_define($hyoo_game_eye, {
-            imageRendering: 'pixelated',
-            background: {
-                image: [['linear-gradient(to bottom, skyblue, black, coral)']],
-            },
+    function $mol_wire_race(...tasks) {
+        const results = tasks.map(task => {
+            try {
+                return task();
+            }
+            catch (error) {
+                return error;
+            }
         });
-    })($$ = $.$$ || ($.$$ = {}));
+        const promises = results.filter(res => res instanceof Promise);
+        if (promises.length)
+            $mol_fail(Promise.race(promises));
+        const error = results.find(res => res instanceof Error);
+        if (error)
+            $mol_fail(error);
+        return results;
+    }
+    $.$mol_wire_race = $mol_wire_race;
 })($ || ($ = {}));
-//hyoo/game/eye/eye.view.css.ts
+//mol/wire/race/race.ts
 ;
 "use strict";
 var $;
@@ -3412,148 +4162,856 @@ var $;
     var $$;
     (function ($$) {
         class $hyoo_game_eye extends $.$hyoo_game_eye {
-            width() {
-                return this.view_rect()?.width ?? 0;
+            program() {
+                return this.context().program({
+                    glob: {
+                        wireframe: 'float',
+                        proj: 'mat4',
+                        view: 'mat4',
+                        Texture: 'sampler2DArray',
+                    },
+                    input: {
+                        vertex_pos: 'vec4',
+                        vertex_tex_pos: 'vec2',
+                        inst_trans: 'mat4',
+                        inst_tex: 'float',
+                    },
+                    pipe: {
+                        world_pos: 'vec4',
+                        view_pos: 'vec4',
+                        texture_id: 'float',
+                        texture_pos: 'vec2',
+                        instance_id: 'float',
+                        vertex_id: 'float',
+                    },
+                    output: {
+                        color: 'vec4',
+                    },
+                }, `
+				void main() {
+					vec4 view_shift = vec4( 0, 0, - wireframe * 0.01, 0 );
+					world_pos = inst_trans * vertex_pos;
+					view_pos = view * world_pos;
+					gl_Position = proj * view_pos + view_shift;
+					gl_PointSize = 5.0;
+					texture_id = float(inst_tex);
+					texture_pos = vertex_tex_pos;
+					instance_id = float(gl_InstanceID);
+					vertex_id = float(gl_VertexID);
+				}
+				
+			`, `
+				void main() {
+					float dim = 1.0 + view_pos.z / 8.0;
+					if( wireframe == 1.0 ) {
+						color = vec4( dim, dim, dim, dim );
+					} else {
+						color = texture( Texture, vec3( texture_pos, int(texture_id) ) ) * dim;
+					}
+				}
+			`);
             }
-            height() {
-                return this.view_rect()?.height ?? 0;
+            proj_matrix() {
+                let aspect = this.width() / this.height();
+                if (!Number.isFinite(aspect))
+                    aspect = 1;
+                return $mol_3d_mat4.perspective(Math.PI / 2, aspect, 0.0001, 10);
             }
-            texture(uri, next) {
-                $mol_wire_solid();
-                if (next)
-                    return next;
-                const texture = new Image;
-                texture.src = uri;
-                texture.onload = () => this.texture(uri, texture);
-                return null;
+            view_matrix() {
+                const [sx, sy] = this.Realm().spawn_pos();
+                const [x, y] = this.pos();
+                const a = this.angle();
+                return $mol_3d_mat4.multiply($mol_3d_mat4.rotation([1, 0, 0], -Math.PI / 2), $mol_3d_mat4.rotation([0, 0, 1], a), $mol_3d_mat4.scaling([1, 1, 1]), $mol_3d_mat4.translation([(x - sx) / -1, (y - sy) / 1, .25]));
             }
-            side_texture(id) {
-                const uri = $mol_array_lottery(this.place_skins()[id.place_kind] ?? []);
-                if (!uri)
-                    return null;
-                return this.texture(uri);
+            groups() {
+                const groups = new Map();
+                for (const obj of this.objects()) {
+                    let list = groups.get(obj.shape());
+                    if (list)
+                        list.push(obj);
+                    else
+                        groups.set(obj.shape(), [obj]);
+                }
+                return groups;
+            }
+            group_textures(shape) {
+                const program = this.program();
+                const objects = this.groups().get(shape);
+                const ids = new Array(objects.length);
+                const map = this.texture_map();
+                for (let i = 0; i < objects.length; ++i) {
+                    ids[i] = new Float32Array([map.get(objects[i].texture())]);
+                }
+                program.geometry(shape).use(geometry => {
+                    program.param('inst_tex').vectors(1).send(ids);
+                });
+                return ids;
+            }
+            group_trans(shape) {
+                const program = this.program();
+                const objects = this.groups().get(shape);
+                program.geometry(shape).use(geometry => {
+                    program.param('inst_trans').matrices([4, 4]).send(objects.map(obj => obj.transform()));
+                });
+            }
+            group_skin(shape) {
+                const program = this.program();
+                program.geometry(shape).use(geometry => {
+                    program.param('vertex_tex_pos').vector(2).send([shape.skin()]);
+                });
+            }
+            group_vertex(shape) {
+                const program = this.program();
+                program.geometry(shape).use(geometry => {
+                    program.param('vertex_pos').vector(3).send([shape.geometry()]);
+                });
+            }
+            prepare_group(shape) {
+                const program = this.program();
+                this.group_skin(shape);
+                this.group_textures(shape);
+                this.group_trans(shape);
+                this.group_vertex(shape);
+                return program.geometry(shape).use(geometry => {
+                    geometry.size = shape.size();
+                    geometry.count = this.groups().get(shape).length;
+                });
+            }
+            prepare() {
+                return new Map([...this.groups().keys()].map(shape => [shape, this.prepare_group(shape)]));
+            }
+            texture_map() {
+                const map = new Map();
+                for (const obj of this.objects()) {
+                    const texture = obj.texture();
+                    const index = map.get(texture);
+                    if (index !== undefined)
+                        continue;
+                    map.set(texture, map.size);
+                }
+                return map;
+            }
+            textures() {
+                const textures = $mol_wire_race(...[...this.texture_map().keys()].map(image => () => image.data()));
+                return this.program().glob('Texture').texture().send_multi(textures);
             }
             paint() {
-                this.pos();
-                const width = this.width();
-                const context = this.context();
-                const height = this.height();
-                const wall_size = this.wall_size();
-                const perspective = this.perspective();
-                const dims = {
-                    'l': 2,
-                    'r': 2,
-                    'd': 1,
-                    'u': 1,
-                };
-                context.clearRect(0, 0, width, height);
-                for (let a = 0; a < width; ++a) {
-                    const { angle, place_coord, place_kind, place_side, x: tx, y: ty } = this.ray(a);
-                    const plank_height = Math.round(perspective / angle) / 2;
-                    const x = a - .5;
-                    const y = .5 + (height - plank_height) / 2 - plank_height / 4 + height / 10;
-                    const texture = this.side_texture({ place_coord, place_kind, place_side });
-                    let side_x = (tx % wall_size + ty % wall_size) / wall_size;
-                    if (place_side === 'd' || place_side === 'l')
-                        side_x = 1 - side_x;
-                    if (texture) {
-                        context.drawImage(texture, Math.floor(side_x * texture.naturalWidth), 0, 1, texture.naturalHeight, x + .5, y, 1, plank_height);
-                        const alpha = 1 - plank_height / 512;
-                        context.strokeStyle = `hsla( 0deg, 0%, 0%, ${alpha} )`;
-                        context.beginPath();
-                        context.moveTo(x, y);
-                        context.lineTo(x, y + plank_height);
-                        context.stroke();
+                this.program().use(program => {
+                    this.textures();
+                    program.glob('proj').matrix(this.proj_matrix());
+                    program.glob('view').matrix(this.view_matrix());
+                    for (const [shape, geometry] of this.prepare().entries()) {
+                        geometry.use(() => {
+                            program.strips(0, shape.size(), geometry.count);
+                            if (this.wireframe()) {
+                                program.glob('wireframe').vector_float([1]);
+                                program.lines(0, shape.size(), geometry.count);
+                                program.points(0, shape.size(), geometry.count);
+                                program.glob('wireframe').vector_float([0]);
+                            }
+                        });
                     }
-                    else {
-                        const hue = Math.floor(place_kind.charCodeAt(0) % 64 / 64 * 360);
-                        const sat = 30 + dims[place_side] * 10;
-                        const light = 50 * Math.min(plank_height / 512, 1);
-                        context.strokeStyle = `hsl( ${hue}deg, ${sat}%, ${light}% )`;
-                        context.beginPath();
-                        context.moveTo(x, y);
-                        context.lineTo(x, y + plank_height);
-                        context.stroke();
-                    }
-                }
-            }
-            ray(a) {
-                const max_d = Math.tan(this.fov() * Math.PI / 360);
-                const step = max_d * 2 / this.width();
-                const d = -max_d + (a + 0.5) * step;
-                const ray_angle = Math.atan2(d, 1);
-                const angle = this.angle() + ray_angle;
-                const [sx, sy] = this.pos();
-                const wall_size = this.wall_size();
-                const map = this.map_rows();
-                const mapWidth = this.map_width();
-                const mapHeight = this.map_height();
-                const rx = Math.cos(angle);
-                const ry = Math.sin(angle);
-                let mx = Math.floor(sx / wall_size);
-                let my = Math.floor(sy / wall_size);
-                let t_max_x = sx / wall_size - mx;
-                if (rx > 0)
-                    t_max_x = 1 - t_max_x;
-                let t_max_y = sy / wall_size - my;
-                if (ry > 0)
-                    t_max_y = 1 - t_max_y;
-                let side, place_kind = '.';
-                while (true) {
-                    if (ry === 0 || t_max_x < t_max_y * Math.abs(rx / ry)) {
-                        side = 'x';
-                        mx += rx > 0 ? 1 : -1;
-                        t_max_x += 1;
-                        if (mx < 0 || mx >= mapWidth)
-                            break;
-                    }
-                    else {
-                        side = 'y';
-                        my += ry > 0 ? 1 : -1;
-                        t_max_y += 1;
-                        if (my < 0 || my >= mapHeight)
-                            break;
-                    }
-                    place_kind = map[my]?.[mx] ?? ' ';
-                    if (['#', '@', ' '].includes(place_kind))
-                        break;
-                }
-                let pos_x, pos_y, place_side;
-                if (side === 'x') {
-                    pos_x = (mx + (rx < 0 ? 1 : 0)) * wall_size;
-                    pos_y = sy + (pos_x - sx) * ry / rx;
-                    place_side = pos_x >= sx ? 'r' : 'l';
-                }
-                else {
-                    pos_y = (my + (ry < 0 ? 1 : 0)) * wall_size;
-                    pos_x = sx + (pos_y - sy) * rx / ry;
-                    place_side = pos_y >= sy ? 'd' : 'u';
-                }
-                const dist = Math.hypot(pos_x - sx, pos_y - sy);
-                return {
-                    x: pos_x,
-                    y: pos_y,
-                    place_coord: [mx, my],
-                    place_kind,
-                    place_side,
-                    dist,
-                    angle: dist * Math.cos(ray_angle),
-                };
+                });
             }
         }
         __decorate([
-            $mol_mem_key
-        ], $hyoo_game_eye.prototype, "texture", null);
-        __decorate([
-            $mol_mem_key
-        ], $hyoo_game_eye.prototype, "side_texture", null);
+            $mol_mem
+        ], $hyoo_game_eye.prototype, "program", null);
         __decorate([
             $mol_mem
-        ], $hyoo_game_eye.prototype, "paint", null);
+        ], $hyoo_game_eye.prototype, "proj_matrix", null);
+        __decorate([
+            $mol_mem
+        ], $hyoo_game_eye.prototype, "view_matrix", null);
+        __decorate([
+            $mol_mem
+        ], $hyoo_game_eye.prototype, "groups", null);
+        __decorate([
+            $mol_mem_key
+        ], $hyoo_game_eye.prototype, "group_textures", null);
+        __decorate([
+            $mol_mem_key
+        ], $hyoo_game_eye.prototype, "group_trans", null);
+        __decorate([
+            $mol_mem_key
+        ], $hyoo_game_eye.prototype, "group_skin", null);
+        __decorate([
+            $mol_mem_key
+        ], $hyoo_game_eye.prototype, "group_vertex", null);
+        __decorate([
+            $mol_mem_key
+        ], $hyoo_game_eye.prototype, "prepare_group", null);
+        __decorate([
+            $mol_mem
+        ], $hyoo_game_eye.prototype, "prepare", null);
+        __decorate([
+            $mol_mem
+        ], $hyoo_game_eye.prototype, "texture_map", null);
+        __decorate([
+            $mol_mem
+        ], $hyoo_game_eye.prototype, "textures", null);
         $$.$hyoo_game_eye = $hyoo_game_eye;
     })($$ = $.$$ || ($.$$ = {}));
 })($ || ($ = {}));
 //hyoo/game/eye/eye.view.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_speck extends $mol_view {
+        attr() {
+            return {
+                ...super.attr(),
+                mol_theme: "$mol_theme_accent"
+            };
+        }
+        style() {
+            return {
+                ...super.style(),
+                minHeight: "1em"
+            };
+        }
+        sub() {
+            return [
+                this.value()
+            ];
+        }
+        value() {
+            return null;
+        }
+    }
+    $.$mol_speck = $mol_speck;
+})($ || ($ = {}));
+//mol/speck/-view.tree/speck.view.tree.ts
+;
+"use strict";
+var $;
+(function ($) {
+    $mol_style_attach("mol/layer/layer.css", ":root {\n\t--mol_layer_hover: 1;\n\t--mol_layer_focus: 2;\n\t--mol_layer_speck: 3;\n\t--mol_layer_float: 4;\n\t--mol_layer_popup: 5;\n}\n");
+})($ || ($ = {}));
+//mol/layer/-css/layer.css.ts
+;
+"use strict";
+var $;
+(function ($) {
+    const { vary } = $mol_style_func;
+    $.$mol_layer = {
+        hover: vary('--mol_layer_hover'),
+        focus: vary('--mol_layer_focus'),
+        speck: vary('--mol_layer_speck'),
+        float: vary('--mol_layer_float'),
+        popup: vary('--mol_layer_popup'),
+    };
+})($ || ($ = {}));
+//mol/layer/layer.ts
+;
+"use strict";
+var $;
+(function ($) {
+    $mol_style_attach("mol/speck/speck.view.css", "[mol_speck] {\n\tfont-size: .625rem;\n\tborder-radius: 1rem;\n\tmargin: -0.5rem -0.25rem;\n\talign-self: flex-start;\n\tmin-height: 1em;\n\tmin-width: .5em;\n\tvertical-align: sub;\n\tpadding: .25em .5em;\n\tposition: absolute;\n\tz-index: var(--mol_layer_speck);\n\ttext-align: center;\n\tline-height: 1;\n\tdisplay: inline-block;\n\twhite-space: nowrap;\n\ttext-overflow: ellipsis;\n}\n");
+})($ || ($ = {}));
+//mol/speck/-css/speck.view.css.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_button extends $mol_view {
+        enabled() {
+            return true;
+        }
+        click(event) {
+            if (event !== undefined)
+                return event;
+            return null;
+        }
+        event_click(event) {
+            if (event !== undefined)
+                return event;
+            return null;
+        }
+        event() {
+            return {
+                ...super.event(),
+                click: (event) => this.event_activate(event),
+                dblclick: (event) => this.clicks(event),
+                keydown: (event) => this.event_key_press(event)
+            };
+        }
+        attr() {
+            return {
+                ...super.attr(),
+                disabled: this.disabled(),
+                role: "button",
+                tabindex: this.tab_index(),
+                title: this.hint_safe()
+            };
+        }
+        sub() {
+            return [
+                this.title()
+            ];
+        }
+        Speck() {
+            const obj = new this.$.$mol_speck();
+            obj.value = () => this.error();
+            return obj;
+        }
+        event_activate(event) {
+            if (event !== undefined)
+                return event;
+            return null;
+        }
+        clicks(event) {
+            if (event !== undefined)
+                return event;
+            return null;
+        }
+        event_key_press(event) {
+            if (event !== undefined)
+                return event;
+            return null;
+        }
+        disabled() {
+            return false;
+        }
+        tab_index() {
+            return 0;
+        }
+        hint() {
+            return "";
+        }
+        hint_safe() {
+            return this.hint();
+        }
+        error() {
+            return "";
+        }
+    }
+    __decorate([
+        $mol_mem
+    ], $mol_button.prototype, "click", null);
+    __decorate([
+        $mol_mem
+    ], $mol_button.prototype, "event_click", null);
+    __decorate([
+        $mol_mem
+    ], $mol_button.prototype, "Speck", null);
+    __decorate([
+        $mol_mem
+    ], $mol_button.prototype, "event_activate", null);
+    __decorate([
+        $mol_mem
+    ], $mol_button.prototype, "clicks", null);
+    __decorate([
+        $mol_mem
+    ], $mol_button.prototype, "event_key_press", null);
+    $.$mol_button = $mol_button;
+})($ || ($ = {}));
+//mol/button/-view.tree/button.view.tree.ts
+;
+"use strict";
+var $;
+(function ($) {
+    let $mol_keyboard_code;
+    (function ($mol_keyboard_code) {
+        $mol_keyboard_code[$mol_keyboard_code["backspace"] = 8] = "backspace";
+        $mol_keyboard_code[$mol_keyboard_code["tab"] = 9] = "tab";
+        $mol_keyboard_code[$mol_keyboard_code["enter"] = 13] = "enter";
+        $mol_keyboard_code[$mol_keyboard_code["shift"] = 16] = "shift";
+        $mol_keyboard_code[$mol_keyboard_code["ctrl"] = 17] = "ctrl";
+        $mol_keyboard_code[$mol_keyboard_code["alt"] = 18] = "alt";
+        $mol_keyboard_code[$mol_keyboard_code["pause"] = 19] = "pause";
+        $mol_keyboard_code[$mol_keyboard_code["capsLock"] = 20] = "capsLock";
+        $mol_keyboard_code[$mol_keyboard_code["escape"] = 27] = "escape";
+        $mol_keyboard_code[$mol_keyboard_code["space"] = 32] = "space";
+        $mol_keyboard_code[$mol_keyboard_code["pageUp"] = 33] = "pageUp";
+        $mol_keyboard_code[$mol_keyboard_code["pageDown"] = 34] = "pageDown";
+        $mol_keyboard_code[$mol_keyboard_code["end"] = 35] = "end";
+        $mol_keyboard_code[$mol_keyboard_code["home"] = 36] = "home";
+        $mol_keyboard_code[$mol_keyboard_code["left"] = 37] = "left";
+        $mol_keyboard_code[$mol_keyboard_code["up"] = 38] = "up";
+        $mol_keyboard_code[$mol_keyboard_code["right"] = 39] = "right";
+        $mol_keyboard_code[$mol_keyboard_code["down"] = 40] = "down";
+        $mol_keyboard_code[$mol_keyboard_code["insert"] = 45] = "insert";
+        $mol_keyboard_code[$mol_keyboard_code["delete"] = 46] = "delete";
+        $mol_keyboard_code[$mol_keyboard_code["key0"] = 48] = "key0";
+        $mol_keyboard_code[$mol_keyboard_code["key1"] = 49] = "key1";
+        $mol_keyboard_code[$mol_keyboard_code["key2"] = 50] = "key2";
+        $mol_keyboard_code[$mol_keyboard_code["key3"] = 51] = "key3";
+        $mol_keyboard_code[$mol_keyboard_code["key4"] = 52] = "key4";
+        $mol_keyboard_code[$mol_keyboard_code["key5"] = 53] = "key5";
+        $mol_keyboard_code[$mol_keyboard_code["key6"] = 54] = "key6";
+        $mol_keyboard_code[$mol_keyboard_code["key7"] = 55] = "key7";
+        $mol_keyboard_code[$mol_keyboard_code["key8"] = 56] = "key8";
+        $mol_keyboard_code[$mol_keyboard_code["key9"] = 57] = "key9";
+        $mol_keyboard_code[$mol_keyboard_code["A"] = 65] = "A";
+        $mol_keyboard_code[$mol_keyboard_code["B"] = 66] = "B";
+        $mol_keyboard_code[$mol_keyboard_code["C"] = 67] = "C";
+        $mol_keyboard_code[$mol_keyboard_code["D"] = 68] = "D";
+        $mol_keyboard_code[$mol_keyboard_code["E"] = 69] = "E";
+        $mol_keyboard_code[$mol_keyboard_code["F"] = 70] = "F";
+        $mol_keyboard_code[$mol_keyboard_code["G"] = 71] = "G";
+        $mol_keyboard_code[$mol_keyboard_code["H"] = 72] = "H";
+        $mol_keyboard_code[$mol_keyboard_code["I"] = 73] = "I";
+        $mol_keyboard_code[$mol_keyboard_code["J"] = 74] = "J";
+        $mol_keyboard_code[$mol_keyboard_code["K"] = 75] = "K";
+        $mol_keyboard_code[$mol_keyboard_code["L"] = 76] = "L";
+        $mol_keyboard_code[$mol_keyboard_code["M"] = 77] = "M";
+        $mol_keyboard_code[$mol_keyboard_code["N"] = 78] = "N";
+        $mol_keyboard_code[$mol_keyboard_code["O"] = 79] = "O";
+        $mol_keyboard_code[$mol_keyboard_code["P"] = 80] = "P";
+        $mol_keyboard_code[$mol_keyboard_code["Q"] = 81] = "Q";
+        $mol_keyboard_code[$mol_keyboard_code["R"] = 82] = "R";
+        $mol_keyboard_code[$mol_keyboard_code["S"] = 83] = "S";
+        $mol_keyboard_code[$mol_keyboard_code["T"] = 84] = "T";
+        $mol_keyboard_code[$mol_keyboard_code["U"] = 85] = "U";
+        $mol_keyboard_code[$mol_keyboard_code["V"] = 86] = "V";
+        $mol_keyboard_code[$mol_keyboard_code["W"] = 87] = "W";
+        $mol_keyboard_code[$mol_keyboard_code["X"] = 88] = "X";
+        $mol_keyboard_code[$mol_keyboard_code["Y"] = 89] = "Y";
+        $mol_keyboard_code[$mol_keyboard_code["Z"] = 90] = "Z";
+        $mol_keyboard_code[$mol_keyboard_code["metaLeft"] = 91] = "metaLeft";
+        $mol_keyboard_code[$mol_keyboard_code["metaRight"] = 92] = "metaRight";
+        $mol_keyboard_code[$mol_keyboard_code["select"] = 93] = "select";
+        $mol_keyboard_code[$mol_keyboard_code["numpad0"] = 96] = "numpad0";
+        $mol_keyboard_code[$mol_keyboard_code["numpad1"] = 97] = "numpad1";
+        $mol_keyboard_code[$mol_keyboard_code["numpad2"] = 98] = "numpad2";
+        $mol_keyboard_code[$mol_keyboard_code["numpad3"] = 99] = "numpad3";
+        $mol_keyboard_code[$mol_keyboard_code["numpad4"] = 100] = "numpad4";
+        $mol_keyboard_code[$mol_keyboard_code["numpad5"] = 101] = "numpad5";
+        $mol_keyboard_code[$mol_keyboard_code["numpad6"] = 102] = "numpad6";
+        $mol_keyboard_code[$mol_keyboard_code["numpad7"] = 103] = "numpad7";
+        $mol_keyboard_code[$mol_keyboard_code["numpad8"] = 104] = "numpad8";
+        $mol_keyboard_code[$mol_keyboard_code["numpad9"] = 105] = "numpad9";
+        $mol_keyboard_code[$mol_keyboard_code["multiply"] = 106] = "multiply";
+        $mol_keyboard_code[$mol_keyboard_code["add"] = 107] = "add";
+        $mol_keyboard_code[$mol_keyboard_code["subtract"] = 109] = "subtract";
+        $mol_keyboard_code[$mol_keyboard_code["decimal"] = 110] = "decimal";
+        $mol_keyboard_code[$mol_keyboard_code["divide"] = 111] = "divide";
+        $mol_keyboard_code[$mol_keyboard_code["F1"] = 112] = "F1";
+        $mol_keyboard_code[$mol_keyboard_code["F2"] = 113] = "F2";
+        $mol_keyboard_code[$mol_keyboard_code["F3"] = 114] = "F3";
+        $mol_keyboard_code[$mol_keyboard_code["F4"] = 115] = "F4";
+        $mol_keyboard_code[$mol_keyboard_code["F5"] = 116] = "F5";
+        $mol_keyboard_code[$mol_keyboard_code["F6"] = 117] = "F6";
+        $mol_keyboard_code[$mol_keyboard_code["F7"] = 118] = "F7";
+        $mol_keyboard_code[$mol_keyboard_code["F8"] = 119] = "F8";
+        $mol_keyboard_code[$mol_keyboard_code["F9"] = 120] = "F9";
+        $mol_keyboard_code[$mol_keyboard_code["F10"] = 121] = "F10";
+        $mol_keyboard_code[$mol_keyboard_code["F11"] = 122] = "F11";
+        $mol_keyboard_code[$mol_keyboard_code["F12"] = 123] = "F12";
+        $mol_keyboard_code[$mol_keyboard_code["numLock"] = 144] = "numLock";
+        $mol_keyboard_code[$mol_keyboard_code["scrollLock"] = 145] = "scrollLock";
+        $mol_keyboard_code[$mol_keyboard_code["semicolon"] = 186] = "semicolon";
+        $mol_keyboard_code[$mol_keyboard_code["equals"] = 187] = "equals";
+        $mol_keyboard_code[$mol_keyboard_code["comma"] = 188] = "comma";
+        $mol_keyboard_code[$mol_keyboard_code["dash"] = 189] = "dash";
+        $mol_keyboard_code[$mol_keyboard_code["period"] = 190] = "period";
+        $mol_keyboard_code[$mol_keyboard_code["forwardSlash"] = 191] = "forwardSlash";
+        $mol_keyboard_code[$mol_keyboard_code["graveAccent"] = 192] = "graveAccent";
+        $mol_keyboard_code[$mol_keyboard_code["bracketOpen"] = 219] = "bracketOpen";
+        $mol_keyboard_code[$mol_keyboard_code["slashBack"] = 220] = "slashBack";
+        $mol_keyboard_code[$mol_keyboard_code["slashBackLeft"] = 226] = "slashBackLeft";
+        $mol_keyboard_code[$mol_keyboard_code["bracketClose"] = 221] = "bracketClose";
+        $mol_keyboard_code[$mol_keyboard_code["quoteSingle"] = 222] = "quoteSingle";
+    })($mol_keyboard_code = $.$mol_keyboard_code || ($.$mol_keyboard_code = {}));
+})($ || ($ = {}));
+//mol/keyboard/code/code.ts
+;
+"use strict";
+var $;
+(function ($) {
+    $mol_style_attach("mol/button/button.view.css", "[mol_button] {\n\tborder: none;\n\tfont: inherit;\n\tdisplay: inline-flex;\n\tflex-shrink: 0;\n\ttext-decoration: inherit;\n\tcursor: inherit;\n\tposition: relative;\n\tbox-sizing: border-box;\n\tword-break: normal;\n\tcursor: default;\n\tuser-select: none;\n\tborder-radius: var(--mol_gap_round);\n}\n\n[mol_button]:where(:not(:disabled)):hover {\n\tz-index: var(--mol_layer_hover);\n}\n\n[mol_button]:focus {\n\toutline: none;\n\tz-index: var(--mol_layer_focus);\n}\n");
+})($ || ($ = {}));
+//mol/button/-css/button.view.css.ts
+;
+"use strict";
+var $;
+(function ($) {
+    var $$;
+    (function ($$) {
+        class $mol_button extends $.$mol_button {
+            status(next = [null]) { return next; }
+            disabled() {
+                return !this.enabled();
+            }
+            event_activate(next) {
+                if (!next)
+                    return;
+                if (!this.enabled())
+                    return;
+                try {
+                    this.event_click(next);
+                    this.click(next);
+                    this.status([null]);
+                }
+                catch (error) {
+                    this.status([error]);
+                    $mol_fail_hidden(error);
+                }
+            }
+            event_key_press(event) {
+                if (event.keyCode === $mol_keyboard_code.enter) {
+                    return this.event_activate(event);
+                }
+            }
+            tab_index() {
+                return this.enabled() ? super.tab_index() : -1;
+            }
+            error() {
+                const [error] = this.status();
+                if (!error)
+                    return '';
+                if (error instanceof Promise) {
+                    return $mol_fail_hidden(error);
+                }
+                return String(error.message ?? error);
+            }
+            hint_safe() {
+                try {
+                    return this.hint();
+                }
+                catch (error) {
+                    $mol_fail_log(error);
+                    return '';
+                }
+            }
+            sub_visible() {
+                return [
+                    ...this.error() ? [this.Speck()] : [],
+                    ...this.sub(),
+                ];
+            }
+        }
+        __decorate([
+            $mol_mem
+        ], $mol_button.prototype, "status", null);
+        $$.$mol_button = $mol_button;
+    })($$ = $.$$ || ($.$$ = {}));
+})($ || ($ = {}));
+//mol/button/button.view.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_button_typed extends $mol_button {
+        minimal_height() {
+            return 40;
+        }
+        minimal_width() {
+            return 40;
+        }
+    }
+    $.$mol_button_typed = $mol_button_typed;
+})($ || ($ = {}));
+//mol/button/typed/-view.tree/typed.view.tree.ts
+;
+"use strict";
+var $;
+(function ($) {
+    $mol_style_attach("mol/button/typed/typed.view.css", "[mol_button_typed] {\n\talign-content: center;\n\talign-items: center;\n\tpadding: var(--mol_gap_text);\n\tborder-radius: var(--mol_gap_round);\n\tgap: var(--mol_gap_space);\n\tuser-select: none;\n\tcursor: pointer;\n}\n\n[mol_button_typed][disabled] {\n\tpointer-events: none;\n}\n\n[mol_button_typed]:hover ,\n[mol_button_typed]:focus {\n\tbackground-color: var(--mol_theme_hover);\n}\n\n[mol_button_typed]:active {\n\tcolor: var(--mol_theme_focus);\n}\n\n");
+})($ || ($ = {}));
+//mol/button/typed/-css/typed.view.css.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_button_minor extends $mol_button_typed {
+    }
+    $.$mol_button_minor = $mol_button_minor;
+})($ || ($ = {}));
+//mol/button/minor/-view.tree/minor.view.tree.ts
+;
+"use strict";
+var $;
+(function ($) {
+    $mol_style_attach("mol/button/minor/minor.view.css", "[mol_button_minor] {\n\tcolor: var(--mol_theme_control);\n}\n\n[mol_button_minor][disabled] {\n\tcolor: var(--mol_theme_shade);\n}\n");
+})($ || ($ = {}));
+//mol/button/minor/-css/minor.view.css.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_check extends $mol_button_minor {
+        attr() {
+            return {
+                ...super.attr(),
+                mol_check_checked: this.checked(),
+                "aria-checked": this.checked(),
+                role: "checkbox"
+            };
+        }
+        sub() {
+            return [
+                this.Icon(),
+                this.label()
+            ];
+        }
+        checked(val) {
+            if (val !== undefined)
+                return val;
+            return false;
+        }
+        Icon() {
+            return null;
+        }
+        title() {
+            return "";
+        }
+        Title() {
+            const obj = new this.$.$mol_view();
+            obj.sub = () => [
+                this.title()
+            ];
+            return obj;
+        }
+        label() {
+            return [
+                this.Title()
+            ];
+        }
+    }
+    __decorate([
+        $mol_mem
+    ], $mol_check.prototype, "checked", null);
+    __decorate([
+        $mol_mem
+    ], $mol_check.prototype, "Title", null);
+    $.$mol_check = $mol_check;
+})($ || ($ = {}));
+//mol/check/-view.tree/check.view.tree.ts
+;
+"use strict";
+var $;
+(function ($) {
+    function $mol_maybe(value) {
+        return (value == null) ? [] : [value];
+    }
+    $.$mol_maybe = $mol_maybe;
+})($ || ($ = {}));
+//mol/maybe/maybe.ts
+;
+"use strict";
+var $;
+(function ($) {
+    $mol_style_attach("mol/check/check.css", "[mol_check] {\n\tflex: 0 0 auto;\n\tjustify-content: flex-start;\n\talign-content: center;\n\talign-items: flex-start;\n\tborder: none;\n\tfont-weight: inherit;\n\tbox-shadow: none;\n\ttext-align: left;\n\tdisplay: inline-flex;\n\tflex-wrap: nowrap;\n}\n\n[mol_check_title] {\n\tflex-shrink: 1;\n}\n\n[mol_check_checked] {\n\tcolor: var(--mol_theme_current);\n}\n");
+})($ || ($ = {}));
+//mol/check/-css/check.css.ts
+;
+"use strict";
+var $;
+(function ($) {
+    var $$;
+    (function ($$) {
+        class $mol_check extends $.$mol_check {
+            click(next) {
+                if (next?.defaultPrevented)
+                    return;
+                this.checked(!this.checked());
+                if (next)
+                    next.preventDefault();
+            }
+            sub() {
+                return [
+                    ...$mol_maybe(this.Icon()),
+                    ...this.label(),
+                ];
+            }
+            label() {
+                return this.title() ? super.label() : [];
+            }
+        }
+        $$.$mol_check = $mol_check;
+    })($$ = $.$$ || ($.$$ = {}));
+})($ || ($ = {}));
+//mol/check/check.view.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_svg extends $mol_view {
+        dom_name() {
+            return "svg";
+        }
+        dom_name_space() {
+            return "http://www.w3.org/2000/svg";
+        }
+        font_size() {
+            return 16;
+        }
+        font_family() {
+            return "";
+        }
+        style_size() {
+            return {};
+        }
+    }
+    $.$mol_svg = $mol_svg;
+})($ || ($ = {}));
+//mol/svg/-view.tree/svg.view.tree.ts
+;
+"use strict";
+var $;
+(function ($) {
+    var $$;
+    (function ($$) {
+        class $mol_svg extends $.$mol_svg {
+            computed_style() {
+                const win = this.$.$mol_dom_context;
+                const style = win.getComputedStyle(this.dom_node());
+                if (!style['font-size'])
+                    $mol_state_time.now(0);
+                return style;
+            }
+            font_size() {
+                return parseInt(this.computed_style()['font-size']) || 16;
+            }
+            font_family() {
+                return this.computed_style()['font-family'];
+            }
+        }
+        __decorate([
+            $mol_mem
+        ], $mol_svg.prototype, "computed_style", null);
+        __decorate([
+            $mol_mem
+        ], $mol_svg.prototype, "font_size", null);
+        __decorate([
+            $mol_mem
+        ], $mol_svg.prototype, "font_family", null);
+        $$.$mol_svg = $mol_svg;
+    })($$ = $.$$ || ($.$$ = {}));
+})($ || ($ = {}));
+//mol/svg/svg.view.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_svg_root extends $mol_svg {
+        dom_name() {
+            return "svg";
+        }
+        attr() {
+            return {
+                ...super.attr(),
+                viewBox: this.view_box(),
+                preserveAspectRatio: this.aspect()
+            };
+        }
+        view_box() {
+            return "0 0 100 100";
+        }
+        aspect() {
+            return "xMidYMid";
+        }
+    }
+    $.$mol_svg_root = $mol_svg_root;
+})($ || ($ = {}));
+//mol/svg/root/-view.tree/root.view.tree.ts
+;
+"use strict";
+var $;
+(function ($) {
+    $mol_style_attach("mol/svg/root/root.view.css", "[mol_svg_root] {\n\toverflow: hidden;\n}\n");
+})($ || ($ = {}));
+//mol/svg/root/-css/root.view.css.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_svg_path extends $mol_svg {
+        dom_name() {
+            return "path";
+        }
+        attr() {
+            return {
+                ...super.attr(),
+                d: this.geometry()
+            };
+        }
+        geometry() {
+            return "";
+        }
+    }
+    $.$mol_svg_path = $mol_svg_path;
+})($ || ($ = {}));
+//mol/svg/path/-view.tree/path.view.tree.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_icon extends $mol_svg_root {
+        view_box() {
+            return "0 0 24 24";
+        }
+        minimal_width() {
+            return 16;
+        }
+        minimal_height() {
+            return 16;
+        }
+        sub() {
+            return [
+                this.Path()
+            ];
+        }
+        path() {
+            return "";
+        }
+        Path() {
+            const obj = new this.$.$mol_svg_path();
+            obj.geometry = () => this.path();
+            return obj;
+        }
+    }
+    __decorate([
+        $mol_mem
+    ], $mol_icon.prototype, "Path", null);
+    $.$mol_icon = $mol_icon;
+})($ || ($ = {}));
+//mol/icon/-view.tree/icon.view.tree.ts
+;
+"use strict";
+var $;
+(function ($) {
+    $mol_style_attach("mol/icon/icon.view.css", "[mol_icon] {\n\tfill: currentColor;\n\tstroke: none;\n\twidth: 1em;\n\theight: 1.5em;\n\tflex: 0 0 auto;\n\tvertical-align: top;\n\tdisplay: inline-block;\n\tfilter: drop-shadow(0px 1px 1px var(--mol_theme_back));\n\ttransform-origin: center;\n}\n\n[mol_icon_path] {\n\ttransform-origin: center;\n}\n");
+})($ || ($ = {}));
+//mol/icon/-css/icon.view.css.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_icon_tick extends $mol_icon {
+        path() {
+            return "M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z";
+        }
+    }
+    $.$mol_icon_tick = $mol_icon_tick;
+})($ || ($ = {}));
+//mol/icon/tick/-view.tree/tick.view.tree.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_check_box extends $mol_check {
+        Icon() {
+            const obj = new this.$.$mol_icon_tick();
+            return obj;
+        }
+    }
+    __decorate([
+        $mol_mem
+    ], $mol_check_box.prototype, "Icon", null);
+    $.$mol_check_box = $mol_check_box;
+})($ || ($ = {}));
+//mol/check/box/-view.tree/box.view.tree.ts
+;
+"use strict";
+var $;
+(function ($) {
+    $mol_style_attach("mol/check/box/box.view.css", "[mol_check_box_icon] {\n\tborder-radius: var(--mol_gap_round);\n\tbox-shadow: 0 0 0 1px var(--mol_theme_line);\n\tcolor: var(--mol_theme_shade);\n\theight: 1rem;\n\talign-self: center;\n}\n\n[mol_check]:not([mol_check_checked]) > [mol_check_box_icon] {\n\tfill: transparent;\n}\n\n[mol_check]:not([disabled]) > [mol_check_box_icon] {\n\tbackground: var(--mol_theme_field);\n\tcolor: var(--mol_theme_text);\n}\n");
+})($ || ($ = {}));
+//mol/check/box/-css/box.view.css.ts
 ;
 "use strict";
 var $;
@@ -4335,158 +5793,6 @@ var $;
 "use strict";
 var $;
 (function ($) {
-    class $mol_svg extends $mol_view {
-        dom_name() {
-            return "svg";
-        }
-        dom_name_space() {
-            return "http://www.w3.org/2000/svg";
-        }
-        font_size() {
-            return 16;
-        }
-        font_family() {
-            return "";
-        }
-        style_size() {
-            return {};
-        }
-    }
-    $.$mol_svg = $mol_svg;
-})($ || ($ = {}));
-//mol/svg/-view.tree/svg.view.tree.ts
-;
-"use strict";
-var $;
-(function ($) {
-    var $$;
-    (function ($$) {
-        class $mol_svg extends $.$mol_svg {
-            computed_style() {
-                const win = this.$.$mol_dom_context;
-                const style = win.getComputedStyle(this.dom_node());
-                if (!style['font-size'])
-                    $mol_state_time.now(0);
-                return style;
-            }
-            font_size() {
-                return parseInt(this.computed_style()['font-size']) || 16;
-            }
-            font_family() {
-                return this.computed_style()['font-family'];
-            }
-        }
-        __decorate([
-            $mol_mem
-        ], $mol_svg.prototype, "computed_style", null);
-        __decorate([
-            $mol_mem
-        ], $mol_svg.prototype, "font_size", null);
-        __decorate([
-            $mol_mem
-        ], $mol_svg.prototype, "font_family", null);
-        $$.$mol_svg = $mol_svg;
-    })($$ = $.$$ || ($.$$ = {}));
-})($ || ($ = {}));
-//mol/svg/svg.view.ts
-;
-"use strict";
-var $;
-(function ($) {
-    class $mol_svg_root extends $mol_svg {
-        dom_name() {
-            return "svg";
-        }
-        attr() {
-            return {
-                ...super.attr(),
-                viewBox: this.view_box(),
-                preserveAspectRatio: this.aspect()
-            };
-        }
-        view_box() {
-            return "0 0 100 100";
-        }
-        aspect() {
-            return "xMidYMid";
-        }
-    }
-    $.$mol_svg_root = $mol_svg_root;
-})($ || ($ = {}));
-//mol/svg/root/-view.tree/root.view.tree.ts
-;
-"use strict";
-var $;
-(function ($) {
-    $mol_style_attach("mol/svg/root/root.view.css", "[mol_svg_root] {\n\toverflow: hidden;\n}\n");
-})($ || ($ = {}));
-//mol/svg/root/-css/root.view.css.ts
-;
-"use strict";
-var $;
-(function ($) {
-    class $mol_svg_path extends $mol_svg {
-        dom_name() {
-            return "path";
-        }
-        attr() {
-            return {
-                ...super.attr(),
-                d: this.geometry()
-            };
-        }
-        geometry() {
-            return "";
-        }
-    }
-    $.$mol_svg_path = $mol_svg_path;
-})($ || ($ = {}));
-//mol/svg/path/-view.tree/path.view.tree.ts
-;
-"use strict";
-var $;
-(function ($) {
-    class $mol_icon extends $mol_svg_root {
-        view_box() {
-            return "0 0 24 24";
-        }
-        minimal_width() {
-            return 16;
-        }
-        minimal_height() {
-            return 16;
-        }
-        sub() {
-            return [
-                this.Path()
-            ];
-        }
-        path() {
-            return "";
-        }
-        Path() {
-            const obj = new this.$.$mol_svg_path();
-            obj.geometry = () => this.path();
-            return obj;
-        }
-    }
-    __decorate([
-        $mol_mem
-    ], $mol_icon.prototype, "Path", null);
-    $.$mol_icon = $mol_icon;
-})($ || ($ = {}));
-//mol/icon/-view.tree/icon.view.tree.ts
-;
-"use strict";
-var $;
-(function ($) {
-    $mol_style_attach("mol/icon/icon.view.css", "[mol_icon] {\n\tfill: currentColor;\n\tstroke: none;\n\twidth: 1em;\n\theight: 1.5em;\n\tflex: 0 0 auto;\n\tvertical-align: top;\n\tdisplay: inline-block;\n\tfilter: drop-shadow(0px 1px 1px var(--mol_theme_back));\n\ttransform-origin: center;\n}\n\n[mol_icon_path] {\n\ttransform-origin: center;\n}\n");
-})($ || ($ = {}));
-//mol/icon/-css/icon.view.css.ts
-;
-"use strict";
-var $;
-(function ($) {
     class $mol_icon_github_circle extends $mol_icon {
         path() {
             return "M12,2C6.48,2 2,6.48 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12C22,6.48 17.52,2 12,2Z";
@@ -4960,115 +6266,6 @@ var $;
 "use strict";
 var $;
 (function ($) {
-    let $mol_keyboard_code;
-    (function ($mol_keyboard_code) {
-        $mol_keyboard_code[$mol_keyboard_code["backspace"] = 8] = "backspace";
-        $mol_keyboard_code[$mol_keyboard_code["tab"] = 9] = "tab";
-        $mol_keyboard_code[$mol_keyboard_code["enter"] = 13] = "enter";
-        $mol_keyboard_code[$mol_keyboard_code["shift"] = 16] = "shift";
-        $mol_keyboard_code[$mol_keyboard_code["ctrl"] = 17] = "ctrl";
-        $mol_keyboard_code[$mol_keyboard_code["alt"] = 18] = "alt";
-        $mol_keyboard_code[$mol_keyboard_code["pause"] = 19] = "pause";
-        $mol_keyboard_code[$mol_keyboard_code["capsLock"] = 20] = "capsLock";
-        $mol_keyboard_code[$mol_keyboard_code["escape"] = 27] = "escape";
-        $mol_keyboard_code[$mol_keyboard_code["space"] = 32] = "space";
-        $mol_keyboard_code[$mol_keyboard_code["pageUp"] = 33] = "pageUp";
-        $mol_keyboard_code[$mol_keyboard_code["pageDown"] = 34] = "pageDown";
-        $mol_keyboard_code[$mol_keyboard_code["end"] = 35] = "end";
-        $mol_keyboard_code[$mol_keyboard_code["home"] = 36] = "home";
-        $mol_keyboard_code[$mol_keyboard_code["left"] = 37] = "left";
-        $mol_keyboard_code[$mol_keyboard_code["up"] = 38] = "up";
-        $mol_keyboard_code[$mol_keyboard_code["right"] = 39] = "right";
-        $mol_keyboard_code[$mol_keyboard_code["down"] = 40] = "down";
-        $mol_keyboard_code[$mol_keyboard_code["insert"] = 45] = "insert";
-        $mol_keyboard_code[$mol_keyboard_code["delete"] = 46] = "delete";
-        $mol_keyboard_code[$mol_keyboard_code["key0"] = 48] = "key0";
-        $mol_keyboard_code[$mol_keyboard_code["key1"] = 49] = "key1";
-        $mol_keyboard_code[$mol_keyboard_code["key2"] = 50] = "key2";
-        $mol_keyboard_code[$mol_keyboard_code["key3"] = 51] = "key3";
-        $mol_keyboard_code[$mol_keyboard_code["key4"] = 52] = "key4";
-        $mol_keyboard_code[$mol_keyboard_code["key5"] = 53] = "key5";
-        $mol_keyboard_code[$mol_keyboard_code["key6"] = 54] = "key6";
-        $mol_keyboard_code[$mol_keyboard_code["key7"] = 55] = "key7";
-        $mol_keyboard_code[$mol_keyboard_code["key8"] = 56] = "key8";
-        $mol_keyboard_code[$mol_keyboard_code["key9"] = 57] = "key9";
-        $mol_keyboard_code[$mol_keyboard_code["A"] = 65] = "A";
-        $mol_keyboard_code[$mol_keyboard_code["B"] = 66] = "B";
-        $mol_keyboard_code[$mol_keyboard_code["C"] = 67] = "C";
-        $mol_keyboard_code[$mol_keyboard_code["D"] = 68] = "D";
-        $mol_keyboard_code[$mol_keyboard_code["E"] = 69] = "E";
-        $mol_keyboard_code[$mol_keyboard_code["F"] = 70] = "F";
-        $mol_keyboard_code[$mol_keyboard_code["G"] = 71] = "G";
-        $mol_keyboard_code[$mol_keyboard_code["H"] = 72] = "H";
-        $mol_keyboard_code[$mol_keyboard_code["I"] = 73] = "I";
-        $mol_keyboard_code[$mol_keyboard_code["J"] = 74] = "J";
-        $mol_keyboard_code[$mol_keyboard_code["K"] = 75] = "K";
-        $mol_keyboard_code[$mol_keyboard_code["L"] = 76] = "L";
-        $mol_keyboard_code[$mol_keyboard_code["M"] = 77] = "M";
-        $mol_keyboard_code[$mol_keyboard_code["N"] = 78] = "N";
-        $mol_keyboard_code[$mol_keyboard_code["O"] = 79] = "O";
-        $mol_keyboard_code[$mol_keyboard_code["P"] = 80] = "P";
-        $mol_keyboard_code[$mol_keyboard_code["Q"] = 81] = "Q";
-        $mol_keyboard_code[$mol_keyboard_code["R"] = 82] = "R";
-        $mol_keyboard_code[$mol_keyboard_code["S"] = 83] = "S";
-        $mol_keyboard_code[$mol_keyboard_code["T"] = 84] = "T";
-        $mol_keyboard_code[$mol_keyboard_code["U"] = 85] = "U";
-        $mol_keyboard_code[$mol_keyboard_code["V"] = 86] = "V";
-        $mol_keyboard_code[$mol_keyboard_code["W"] = 87] = "W";
-        $mol_keyboard_code[$mol_keyboard_code["X"] = 88] = "X";
-        $mol_keyboard_code[$mol_keyboard_code["Y"] = 89] = "Y";
-        $mol_keyboard_code[$mol_keyboard_code["Z"] = 90] = "Z";
-        $mol_keyboard_code[$mol_keyboard_code["metaLeft"] = 91] = "metaLeft";
-        $mol_keyboard_code[$mol_keyboard_code["metaRight"] = 92] = "metaRight";
-        $mol_keyboard_code[$mol_keyboard_code["select"] = 93] = "select";
-        $mol_keyboard_code[$mol_keyboard_code["numpad0"] = 96] = "numpad0";
-        $mol_keyboard_code[$mol_keyboard_code["numpad1"] = 97] = "numpad1";
-        $mol_keyboard_code[$mol_keyboard_code["numpad2"] = 98] = "numpad2";
-        $mol_keyboard_code[$mol_keyboard_code["numpad3"] = 99] = "numpad3";
-        $mol_keyboard_code[$mol_keyboard_code["numpad4"] = 100] = "numpad4";
-        $mol_keyboard_code[$mol_keyboard_code["numpad5"] = 101] = "numpad5";
-        $mol_keyboard_code[$mol_keyboard_code["numpad6"] = 102] = "numpad6";
-        $mol_keyboard_code[$mol_keyboard_code["numpad7"] = 103] = "numpad7";
-        $mol_keyboard_code[$mol_keyboard_code["numpad8"] = 104] = "numpad8";
-        $mol_keyboard_code[$mol_keyboard_code["numpad9"] = 105] = "numpad9";
-        $mol_keyboard_code[$mol_keyboard_code["multiply"] = 106] = "multiply";
-        $mol_keyboard_code[$mol_keyboard_code["add"] = 107] = "add";
-        $mol_keyboard_code[$mol_keyboard_code["subtract"] = 109] = "subtract";
-        $mol_keyboard_code[$mol_keyboard_code["decimal"] = 110] = "decimal";
-        $mol_keyboard_code[$mol_keyboard_code["divide"] = 111] = "divide";
-        $mol_keyboard_code[$mol_keyboard_code["F1"] = 112] = "F1";
-        $mol_keyboard_code[$mol_keyboard_code["F2"] = 113] = "F2";
-        $mol_keyboard_code[$mol_keyboard_code["F3"] = 114] = "F3";
-        $mol_keyboard_code[$mol_keyboard_code["F4"] = 115] = "F4";
-        $mol_keyboard_code[$mol_keyboard_code["F5"] = 116] = "F5";
-        $mol_keyboard_code[$mol_keyboard_code["F6"] = 117] = "F6";
-        $mol_keyboard_code[$mol_keyboard_code["F7"] = 118] = "F7";
-        $mol_keyboard_code[$mol_keyboard_code["F8"] = 119] = "F8";
-        $mol_keyboard_code[$mol_keyboard_code["F9"] = 120] = "F9";
-        $mol_keyboard_code[$mol_keyboard_code["F10"] = 121] = "F10";
-        $mol_keyboard_code[$mol_keyboard_code["F11"] = 122] = "F11";
-        $mol_keyboard_code[$mol_keyboard_code["F12"] = 123] = "F12";
-        $mol_keyboard_code[$mol_keyboard_code["numLock"] = 144] = "numLock";
-        $mol_keyboard_code[$mol_keyboard_code["scrollLock"] = 145] = "scrollLock";
-        $mol_keyboard_code[$mol_keyboard_code["semicolon"] = 186] = "semicolon";
-        $mol_keyboard_code[$mol_keyboard_code["equals"] = 187] = "equals";
-        $mol_keyboard_code[$mol_keyboard_code["comma"] = 188] = "comma";
-        $mol_keyboard_code[$mol_keyboard_code["dash"] = 189] = "dash";
-        $mol_keyboard_code[$mol_keyboard_code["period"] = 190] = "period";
-        $mol_keyboard_code[$mol_keyboard_code["forwardSlash"] = 191] = "forwardSlash";
-        $mol_keyboard_code[$mol_keyboard_code["graveAccent"] = 192] = "graveAccent";
-        $mol_keyboard_code[$mol_keyboard_code["bracketOpen"] = 219] = "bracketOpen";
-        $mol_keyboard_code[$mol_keyboard_code["slashBack"] = 220] = "slashBack";
-        $mol_keyboard_code[$mol_keyboard_code["slashBackLeft"] = 226] = "slashBackLeft";
-        $mol_keyboard_code[$mol_keyboard_code["bracketClose"] = 221] = "bracketClose";
-        $mol_keyboard_code[$mol_keyboard_code["quoteSingle"] = 222] = "quoteSingle";
-    })($mol_keyboard_code = $.$mol_keyboard_code || ($.$mol_keyboard_code = {}));
-})($ || ($ = {}));
-//mol/keyboard/code/code.ts
-;
-"use strict";
-var $;
-(function ($) {
     var $$;
     (function ($$) {
         class $mol_keyboard_state extends $.$mol_keyboard_state {
@@ -5105,18 +6302,12 @@ var $;
 var $;
 (function ($) {
     class $hyoo_game_arcade extends $mol_stack {
-        attr() {
-            return {
-                ...super.attr(),
-                mol_theme: "$mol_theme_light"
-            };
-        }
         map() {
-            return "##....#@#....##\n#.............#\n...............\n...#@#...#@#...\n...@.@...@.@...\n...#@#...#@#...\n#.............#\n@.............@\n#.............#\n...#@#...#@#...\n...@.@...@.@...\n...#@#...#@#...\n...............\n#.............#\n##....#@#....##";
+            return "🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑\n🛑🛑🟦⚫⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫⚫🟦🛑🛑\n🛑🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🛑\n🛑⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🛑\n🛑⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🟦🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🛑\n🛑⚫⚫⚫🎨🟦🎨⚫⚫⚫🎨🟦🎨⚫⚫⚫🟦🟦🟦⚫⚫⚫🎨🟦🎨⚫⚫⚫🎨🟦🎨⚫⚫⚫🛑\n🛑⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🟦🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🛑\n🛑🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🟦🟦🟦🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🛑\n🛑🎨⚫⚫⚫⚫⚫⚫🔼⚫⚫⚫⚫⚫⚫🎨🟦🟦🟦🎨⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🎨🛑\n🛑🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🟦🟦🟦🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🛑\n🛑⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🟦🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🛑\n🛑⚫⚫⚫🎨🟦🎨⚫⚫⚫🎨🟦🎨⚫⚫⚫🟦🟦🟦⚫⚫⚫🎨🟦🎨⚫⚫⚫🎨🟦🎨⚫⚫⚫🛑\n🛑⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🟦🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🛑\n🛑⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🛑\n🛑🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🛑\n🛑🛑🟦⚫⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫⚫🟦🛑🛑\n🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑";
         }
         place_skins() {
             return {
-                "@": [
+                "🎨": [
                     "hyoo/game/arcade/texture/meme/1.jpg",
                     "hyoo/game/arcade/texture/meme/2.jpg",
                     "hyoo/game/arcade/texture/meme/3.jpg",
@@ -5135,11 +6326,27 @@ var $;
                     "hyoo/game/arcade/texture/meme/16.jpg",
                     "hyoo/game/arcade/texture/meme/17.jpg",
                     "hyoo/game/arcade/texture/meme/18.jpg"
+                ],
+                "🟦": [
+                    "hyoo/game/arcade/texture/wall/0.jpg",
+                    "hyoo/game/arcade/texture/wall/1.jpg"
+                ],
+                "🛑": [
+                    "hyoo/game/arcade/texture/border.jpg"
                 ]
             };
         }
         spawn_pos() {
             return this.Realm().spawn_pos();
+        }
+        map_rows() {
+            return this.Realm().map_rows();
+        }
+        map_width() {
+            return this.Realm().map_width();
+        }
+        map_height() {
+            return this.Realm().map_height();
         }
         Realm() {
             const obj = new this.$.$hyoo_game_realm();
@@ -5185,7 +6392,7 @@ var $;
         }
         sub() {
             return [
-                this.Guy_eye(),
+                this.View(),
                 this.Hud()
             ];
         }
@@ -5199,12 +6406,89 @@ var $;
                 this.guy_tick()
             ];
         }
+        Square() {
+            const obj = new this.$.$mol_3d_shape_square();
+            return obj;
+        }
+        Square_big() {
+            const obj = new this.$.$mol_3d_shape_square();
+            obj.skin = () => this.square_big_skin();
+            return obj;
+        }
+        Image(id) {
+            const obj = new this.$.$mol_3d_image();
+            obj.uri = () => this.image_uri(id);
+            return obj;
+        }
+        walls() {
+            return [];
+        }
+        Wall(id) {
+            const obj = new this.$.$mol_3d_object();
+            obj.shape = () => this.Square();
+            obj.texture = () => this.wall_image(id);
+            obj.transform = () => this.wall_trans(id);
+            return obj;
+        }
+        Floor_image() {
+            const obj = new this.$.$mol_3d_image();
+            obj.uri = () => "hyoo/game/arcade/texture/ground.jpg";
+            return obj;
+        }
+        floor_trans() {
+            const obj = new this.$.$mol_3d_mat4();
+            return obj;
+        }
+        Floor() {
+            const obj = new this.$.$mol_3d_object();
+            obj.shape = () => this.Square_big();
+            obj.texture = () => this.Floor_image();
+            obj.transform = () => this.floor_trans();
+            return obj;
+        }
+        ceil_trans() {
+            const obj = new this.$.$mol_3d_mat4();
+            return obj;
+        }
+        Ceil() {
+            const obj = new this.$.$mol_3d_object();
+            obj.shape = () => this.Square_big();
+            obj.texture = () => this.Floor_image();
+            obj.transform = () => this.ceil_trans();
+            return obj;
+        }
         Guy_eye() {
             const obj = new this.$.$hyoo_game_eye();
             obj.Realm = () => this.Realm();
             obj.pos = () => this.guy_pos();
             obj.angle = () => this.guy_angle();
-            obj.place_skins = () => this.place_skins();
+            obj.wireframe = () => this.wireframe();
+            obj.objects = () => [
+                this.Floor(),
+                this.Ceil(),
+                ...this.walls()
+            ];
+            return obj;
+        }
+        View() {
+            const obj = new this.$.$mol_view();
+            obj.sub = () => [
+                this.Guy_eye()
+            ];
+            return obj;
+        }
+        title() {
+            return "$hyoo_game_arcade";
+        }
+        wireframe(next) {
+            if (next !== undefined)
+                return next;
+            return false;
+        }
+        Wireframe() {
+            const obj = new this.$.$mol_check_box();
+            obj.title = () => "Wireframe";
+            obj.checked = (next) => this.wireframe(next);
             return obj;
         }
         Sources() {
@@ -5212,11 +6496,18 @@ var $;
             obj.uri = () => "https://github.com/hyoo-ru/game.hyoo.ru";
             return obj;
         }
+        stat() {
+            return "";
+        }
         Hud() {
             const obj = new this.$.$mol_page();
             obj.title = () => this.title();
             obj.tools = () => [
+                this.Wireframe(),
                 this.Sources()
+            ];
+            obj.foot = () => [
+                this.stat()
             ];
             return obj;
         }
@@ -5238,6 +6529,21 @@ var $;
             });
             return obj;
         }
+        square_big_skin() {
+            const obj = new this.$.Float32Array();
+            return obj;
+        }
+        image_uri(id) {
+            return "";
+        }
+        wall_image(id) {
+            const obj = new this.$.$mol_3d_image();
+            return obj;
+        }
+        wall_trans(id) {
+            const obj = new this.$.$mol_3d_mat4();
+            return obj;
+        }
     }
     __decorate([
         $mol_mem
@@ -5250,7 +6556,43 @@ var $;
     ], $hyoo_game_arcade.prototype, "Guy", null);
     __decorate([
         $mol_mem
+    ], $hyoo_game_arcade.prototype, "Square", null);
+    __decorate([
+        $mol_mem
+    ], $hyoo_game_arcade.prototype, "Square_big", null);
+    __decorate([
+        $mol_mem_key
+    ], $hyoo_game_arcade.prototype, "Image", null);
+    __decorate([
+        $mol_mem_key
+    ], $hyoo_game_arcade.prototype, "Wall", null);
+    __decorate([
+        $mol_mem
+    ], $hyoo_game_arcade.prototype, "Floor_image", null);
+    __decorate([
+        $mol_mem
+    ], $hyoo_game_arcade.prototype, "floor_trans", null);
+    __decorate([
+        $mol_mem
+    ], $hyoo_game_arcade.prototype, "Floor", null);
+    __decorate([
+        $mol_mem
+    ], $hyoo_game_arcade.prototype, "ceil_trans", null);
+    __decorate([
+        $mol_mem
+    ], $hyoo_game_arcade.prototype, "Ceil", null);
+    __decorate([
+        $mol_mem
     ], $hyoo_game_arcade.prototype, "Guy_eye", null);
+    __decorate([
+        $mol_mem
+    ], $hyoo_game_arcade.prototype, "View", null);
+    __decorate([
+        $mol_mem
+    ], $hyoo_game_arcade.prototype, "wireframe", null);
+    __decorate([
+        $mol_mem
+    ], $hyoo_game_arcade.prototype, "Wireframe", null);
     __decorate([
         $mol_mem
     ], $hyoo_game_arcade.prototype, "Sources", null);
@@ -5260,6 +6602,15 @@ var $;
     __decorate([
         $mol_mem
     ], $hyoo_game_arcade.prototype, "Control", null);
+    __decorate([
+        $mol_mem
+    ], $hyoo_game_arcade.prototype, "square_big_skin", null);
+    __decorate([
+        $mol_mem_key
+    ], $hyoo_game_arcade.prototype, "wall_image", null);
+    __decorate([
+        $mol_mem_key
+    ], $hyoo_game_arcade.prototype, "wall_trans", null);
     $.$hyoo_game_arcade = $hyoo_game_arcade;
 })($ || ($ = {}));
 //hyoo/game/arcade/-view.tree/arcade.view.tree.ts
@@ -5267,10 +6618,24 @@ var $;
 "use strict";
 var $;
 (function ($) {
+    function $mol_array_lottery(list) {
+        return list[Math.floor(Math.random() * list.length)];
+    }
+    $.$mol_array_lottery = $mol_array_lottery;
+})($ || ($ = {}));
+//mol/array/lottery/lottery.ts
+;
+"use strict";
+var $;
+(function ($) {
     var $$;
     (function ($$) {
         $mol_style_define($hyoo_game_arcade, {
-            Guy_eye: {
+            View: {
+                alignSelf: 'stretch',
+                justifySelf: 'stretch',
+            },
+            Hud: {
                 alignSelf: 'stretch',
                 justifySelf: 'stretch',
             },
@@ -5285,7 +6650,92 @@ var $;
     var $$;
     (function ($$) {
         class $hyoo_game_arcade extends $.$hyoo_game_arcade {
+            stat() {
+                return [
+                    `pos: ${this.guy_pos().map(v => v.toFixed(3)).join(' x ')}`,
+                    `angle: ${this.guy_angle().toFixed(3)}`,
+                    `objects: ${this.Guy_eye().objects().length}`,
+                    `shapes: ${this.Guy_eye().groups().size}`,
+                    `textures: ${this.Guy_eye().texture_map().size}`,
+                ].join(' | ');
+            }
+            world_items() {
+                const map = this.Realm().map_rows();
+                const items = [];
+                for (let y = 0; y < map.length; ++y) {
+                    const row = map[y];
+                    for (let x = 0; x < row.length; ++x) {
+                        if (row[x] === '⚫')
+                            continue;
+                        if (map[y + 1]?.[x] === '⚫')
+                            items.push({ x, y, kind: map[y][x], side: 0 });
+                        if (map[y][x - 1] === '⚫')
+                            items.push({ x, y, kind: map[y][x], side: 1 });
+                        if (map[y - 1]?.[x] === '⚫')
+                            items.push({ x, y, kind: map[y][x], side: 2 });
+                        if (map[y][x + 1] === '⚫')
+                            items.push({ x, y, kind: map[y][x], side: 3 });
+                    }
+                }
+                return items;
+            }
+            walls() {
+                return this.world_items().map((_, i) => this.Wall(i));
+            }
+            wall_image(index) {
+                const kind = this.world_items()[index].kind;
+                const url = $mol_array_lottery(this.place_skins()[kind]);
+                return this.Image(url);
+            }
+            wall_trans(index) {
+                const map = this.Realm().map_rows();
+                const items = this.world_items();
+                const { x, y, side } = items[index];
+                return $mol_3d_mat4.multiply($mol_3d_mat4.translation([x - map[0].length / 2 + .5, -(y - map.length / 2 + .5), 0]), $mol_3d_mat4.scaling([.5, .5, .5]), $mol_3d_mat4.rotation([1, 0, 0], Math.PI / 2), $mol_3d_mat4.rotation([0, 1, 0], side * -Math.PI / 2), $mol_3d_mat4.translation([0, 0, 1]));
+            }
+            floor_trans() {
+                const width = this.map_width();
+                const height = this.map_height();
+                return $mol_3d_mat4.multiply($mol_3d_mat4.translation([0, 0, -.5]), $mol_3d_mat4.scaling([width / 2, height / 2, 1]));
+            }
+            ceil_trans() {
+                const width = this.map_width();
+                const height = this.map_height();
+                return $mol_3d_mat4.multiply($mol_3d_mat4.translation([0, 0, .5]), $mol_3d_mat4.scaling([width / 2, -height / 2, 1]));
+            }
+            square_big_skin() {
+                return new Float32Array([
+                    0, 20,
+                    20, 20,
+                    0, 0,
+                    20, 0,
+                ]);
+            }
+            image_uri(url) {
+                return url;
+            }
         }
+        __decorate([
+            $mol_mem
+        ], $hyoo_game_arcade.prototype, "world_items", null);
+        __decorate([
+            $mol_mem
+        ], $hyoo_game_arcade.prototype, "walls", null);
+        __decorate([
+            $mol_mem_key
+        ], $hyoo_game_arcade.prototype, "wall_image", null);
+        __decorate([
+            $mol_mem_key
+        ], $hyoo_game_arcade.prototype, "wall_trans", null);
+        __decorate([
+            $mol_mem
+        ], $hyoo_game_arcade.prototype, "floor_trans", null);
+        __decorate([
+            $mol_mem
+        ], $hyoo_game_arcade.prototype, "ceil_trans", null);
+        __decorate([
+            $mol_mem
+        ], $hyoo_game_arcade.prototype, "square_big_skin", null);
         $$.$hyoo_game_arcade = $hyoo_game_arcade;
     })($$ = $.$$ || ($.$$ = {}));
 })($ || ($ = {}));

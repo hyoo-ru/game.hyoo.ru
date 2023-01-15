@@ -1,9 +1,8 @@
 $mol_stack $mol_view
 
 $hyoo_game_realm $mol_object2
-	wall_size 10
 	map \ 
-	map_rows /string
+	map_rows /string[]
 	map_width 0
 	map_height 0
 	spawn_pos /number
@@ -19,8 +18,8 @@ $hyoo_game_actor $mol_object2
 	angle? 0
 	move_speed_track? 0
 	move_speed_side? 0
-	move_speed_track_max? 1
-	move_speed_side_max? 1
+	move_speed_track_max? 0.1
+	move_speed_side_max? 0.1
 	turn_speed? 0
 	turn_speed_max? 0.05
 	turn_left? false
@@ -31,48 +30,72 @@ $hyoo_game_actor $mol_object2
 	move_left? false
 	tick null
 
-$mol_canvas $mol_view
+$mol_3d_pane $mol_view
 	dom_name \canvas
-	context CanvasRenderingContext2D
-	attr *
+	context $mol_3d_context / <= context_native WebGL2RenderingContext
+	field *
 		^
-		width <= width 400
-		height <= height 300
+		width <= width 0
+		height <= height 0
 	paint null
 
-$hyoo_game_eye $mol_canvas
-	perspective 25000
-	fov 60
+$hyoo_game_eye $mol_3d_pane
+	objects /$mol_3d_object
 	Realm $hyoo_game_realm
-		map_rows => map_rows
-		map_width => map_width
-		map_height => map_height
-		wall_size => wall_size
 	pos? /number
 		0
 		0
 	angle? 1
-	width 0
-	height 0
-	height_half 0
-	place_skins *
+	wireframe false
 
-$mol_link $mol_view
-	uri \
-	dom_name \a
+$mol_speck $mol_view
 	attr *
 		^
-		href <= uri_toggle \
-		title <= hint_safe <= hint \
-		target <= target \_self
-		download <= file_name \
-		mol_link_current <= current false
-	sub /$mol_view_content
-		<= title
-	arg *
+		mol_theme \$mol_theme_accent
+	style *
+		^
+		minHeight \1em
+	sub /
+		<= value null
+
+$mol_button $mol_view
+	enabled true
+	click?event null
+	event_click?event null
 	event *
 		^
-		click?event <=> click?event <=> event_click?event null
+		click?event <=> event_activate?event null
+		dblclick?event <=> clicks?event null
+		keydown?event <=> event_key_press?event null 
+	attr *
+		^
+		disabled <= disabled false
+		role \button
+		tabindex <= tab_index 0
+		title <= hint_safe <= hint \
+	sub /$mol_view_content
+		<= title
+	Speck $mol_speck
+		value <= error \
+
+$mol_button_typed $mol_button
+	minimal_height 40
+	minimal_width 40
+
+$mol_button_minor $mol_button_typed
+
+$mol_check $mol_button_minor
+	attr *
+		^
+		mol_check_checked <= checked?val false
+		aria-checked <= checked?val false
+		role \checkbox
+	sub /$mol_view_content
+		<= Icon null
+		<= label /
+			<= Title $mol_view
+				sub /
+					<= title \
 
 $mol_svg $mol_view
 	dom_name \svg
@@ -102,6 +125,28 @@ $mol_icon $mol_svg_root
 	sub /
 		<= Path $mol_svg_path
 			geometry <= path \
+
+$mol_icon_tick $mol_icon path \M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z
+
+$mol_check_box $mol_check
+	Icon $mol_icon_tick
+
+$mol_link $mol_view
+	uri \
+	dom_name \a
+	attr *
+		^
+		href <= uri_toggle \
+		title <= hint_safe <= hint \
+		target <= target \_self
+		download <= file_name \
+		mol_link_current <= current false
+	sub /$mol_view_content
+		<= title
+	arg *
+	event *
+		^
+		click?event <=> click?event <=> event_click?event null
 
 $mol_icon_github_circle $mol_icon path \M12,2C6.48,2 2,6.48 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12C22,6.48 17.52,2 12,2Z
 
@@ -152,27 +197,26 @@ $mol_keyboard_state $mol_plugin
 	key *
 
 $hyoo_game_arcade $mol_stack
-	attr *
-		^
-		mol_theme \$mol_theme_light
 	map \
-		\##....#@#....##
-		\#.............#
-		\...............
-		\...#@#...#@#...
-		\...@.@...@.@...
-		\...#@#...#@#...
-		\#.............#
-		\@.............@
-		\#.............#
-		\...#@#...#@#...
-		\...@.@...@.@...
-		\...#@#...#@#...
-		\...............
-		\#.............#
-		\##....#@#....##
+		\🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
+		\🛑🛑🟦⚫⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫⚫🟦🛑🛑
+		\🛑🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🛑
+		\🛑⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🛑
+		\🛑⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🟦🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🛑
+		\🛑⚫⚫⚫🎨🟦🎨⚫⚫⚫🎨🟦🎨⚫⚫⚫🟦🟦🟦⚫⚫⚫🎨🟦🎨⚫⚫⚫🎨🟦🎨⚫⚫⚫🛑
+		\🛑⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🟦🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🛑
+		\🛑🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🟦🟦🟦🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🛑
+		\🛑🎨⚫⚫⚫⚫⚫⚫🔼⚫⚫⚫⚫⚫⚫🎨🟦🟦🟦🎨⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🎨🛑
+		\🛑🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🟦🟦🟦🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🛑
+		\🛑⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🟦🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🛑
+		\🛑⚫⚫⚫🎨🟦🎨⚫⚫⚫🎨🟦🎨⚫⚫⚫🟦🟦🟦⚫⚫⚫🎨🟦🎨⚫⚫⚫🎨🟦🎨⚫⚫⚫🛑
+		\🛑⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🟦🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🛑
+		\🛑⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🛑
+		\🛑🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🛑
+		\🛑🛑🟦⚫⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫⚫🟦🛑🛑
+		\🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
 	place_skins *
-		@ /string
+		🎨 /string
 			\hyoo/game/arcade/texture/meme/1.jpg
 			\hyoo/game/arcade/texture/meme/2.jpg
 			\hyoo/game/arcade/texture/meme/3.jpg
@@ -191,13 +235,17 @@ $hyoo_game_arcade $mol_stack
 			\hyoo/game/arcade/texture/meme/16.jpg
 			\hyoo/game/arcade/texture/meme/17.jpg
 			\hyoo/game/arcade/texture/meme/18.jpg
-		- # /string
-			\hyoo/game/arcade/texture/skinface.jpg
-		- . /string
-			\hyoo/game/arcade/texture/skinface.jpg
+		🟦 /string
+			\hyoo/game/arcade/texture/wall/0.jpg
+			\hyoo/game/arcade/texture/wall/1.jpg
+		🛑 /string
+			\hyoo/game/arcade/texture/border.jpg
 	Realm $hyoo_game_realm
 		map <= map
 		spawn_pos => spawn_pos
+		map_rows => map_rows
+		map_width => map_width
+		map_height => map_height
 	guy_pos? /
 		^ spawn_pos
 	Guy $hyoo_game_actor
@@ -212,16 +260,33 @@ $hyoo_game_arcade $mol_stack
 		angle => guy_angle
 		tick => guy_tick
 	sub /
-		<= Guy_eye $hyoo_game_eye
-			Realm <= Realm
-			pos <= guy_pos
-			angle <= guy_angle
-			place_skins <= place_skins
+		<= View $mol_view sub /
+			<= Guy_eye $hyoo_game_eye
+				Realm <= Realm
+				pos <= guy_pos
+				angle <= guy_angle
+				wireframe <= wireframe
+				objects /$mol_3d_object
+					<= Floor $mol_3d_object
+						shape <= Square_big
+						texture <= Floor_image $mol_3d_image
+							uri \hyoo/game/arcade/texture/ground.jpg
+						transform <= floor_trans $mol_3d_mat4
+					<= Ceil $mol_3d_object
+						shape <= Square_big
+						texture <= Floor_image
+						transform <= ceil_trans $mol_3d_mat4
+					^ walls
 		<= Hud $mol_page
-			title <= title
+			title <= title \$hyoo_game_arcade
 			tools /
+				<= Wireframe $mol_check_box
+					title \Wireframe
+					checked? <=> wireframe? false
 				<= Sources $mol_link_source
 					uri \https://github.com/hyoo-ru/game.hyoo.ru
+			foot /
+				<= stat \
 	plugins /
 		<= Control $mol_keyboard_state
 			key *
@@ -239,3 +304,14 @@ $hyoo_game_arcade $mol_stack
 				pageDown? <=> move_right?
 	auto /
 		<= guy_tick
+	-
+	Square $mol_3d_shape_square
+	Square_big $mol_3d_shape_square
+		skin <= square_big_skin Float32Array
+	Image* $mol_3d_image
+		uri <= image_uri* \
+	walls /$mol_3d_object
+	Wall* $mol_3d_object
+		shape <= Square
+		texture <= wall_image* $mol_3d_image
+		transform <= wall_trans* $mol_3d_mat4

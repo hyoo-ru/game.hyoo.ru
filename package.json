@@ -98,6 +98,8 @@
     "$mol_style_sheet",
     "$mol_stack",
     "$hyoo_game_realm",
+    "$mol_array_lottery",
+    "$mol_array",
     "$hyoo_game_actor",
     "$mol_state_time",
     "$mol_state",
@@ -151,9 +153,7 @@
     "$mol_scroll",
     "$mol_print",
     "$mol_dom_listener",
-    "$mol_keyboard_state",
-    "$mol_array_lottery",
-    "$mol_array"
+    "$mol_keyboard_state"
   ],
   "dependencies": {
     "jsdom": "*",

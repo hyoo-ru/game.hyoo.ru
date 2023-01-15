@@ -790,6 +790,10 @@ declare namespace $ {
     }
 }
 
+declare namespace $ {
+    function $mol_array_lottery<Value>(list: readonly Value[]): Value;
+}
+
 declare namespace $.$$ {
     class $hyoo_game_realm extends $.$hyoo_game_realm {
         map_rows(): string[][];
@@ -798,6 +802,10 @@ declare namespace $.$$ {
         coord_by_pos([px, py]: readonly number[]): number[];
         pos_by_coord([cx, cy]: number[]): number[];
         place_by_pos([px, py]: number[]): string;
+        spawn_places(): {
+            x: number;
+            y: number;
+        }[];
         spawn_pos(): number[];
     }
 }
@@ -1861,10 +1869,6 @@ declare namespace $ {
         wall_image(id: any): $mol_3d_image;
         wall_trans(id: any): $mol_3d_mat4;
     }
-}
-
-declare namespace $ {
-    function $mol_array_lottery<Value>(list: readonly Value[]): Value;
 }
 
 declare namespace $.$$ {

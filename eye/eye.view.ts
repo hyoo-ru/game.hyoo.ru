@@ -23,6 +23,7 @@ namespace $.$$ {
 						view_pos: 'vec4',
 						texture_id: 'float',
 						texture_pos: 'vec2',
+						texture_scale: 'vec2',
 						instance_id: 'float',
 						vertex_id: 'float',
 					},
@@ -41,15 +42,23 @@ namespace $.$$ {
 					texture_pos = vertex_tex_pos;
 					instance_id = float(gl_InstanceID);
 					vertex_id = float(gl_VertexID);
+					
+					texture_scale = 2.0 * vec2(
+						length(inst_trans[0]),
+						length(inst_trans[1])
+					);
+					
 				}
 				
 			`, `
 				void main() {
-					float dim = 1.0 + view_pos.z / 8.0;
+					float dim = min( 1.0, 3.0 / pow( length( view_pos ), 2.0 ) );
 					if( wireframe == 1.0 ) {
-						color = vec4( dim, dim, dim, dim );
+						color = dim * vec4( 1, 1, 1, 1 );
 					} else {
-						color = texture( Texture, vec3( texture_pos, round(texture_id) ) ) * dim;
+						vec3 coord = vec3( texture_pos * texture_scale, round(texture_id) );
+						color = texture( Texture, coord );
+						color = vec4( color.rgb * dim, color.a );
 					}
 				}
 			` )
@@ -59,7 +68,7 @@ namespace $.$$ {
 		proj_matrix() {
 			let aspect = this.width() / this.height()
 			if( !Number.isFinite( aspect ) ) aspect = 1
-			return $mol_3d_mat4.perspective( Math.PI / 2, aspect, 0.0001, 10 )
+			return $mol_3d_mat4.perspective( Math.PI / 2, aspect, 0.0001, 50 )
 		}
 		
 		@ $mol_mem

@@ -4198,7 +4198,7 @@ var $;
 					if( wireframe == 1.0 ) {
 						color = vec4( dim, dim, dim, dim );
 					} else {
-						color = texture( Texture, vec3( texture_pos, int(texture_id) ) ) * dim;
+						color = texture( Texture, vec3( texture_pos, round(texture_id) ) ) * dim;
 					}
 				}
 			`);

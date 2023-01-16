@@ -13,6 +13,8 @@ $hyoo_game_actor $mol_object2
 	Realm $hyoo_game_realm
 		place_by_pos* => place_by_pos*
 	pos? /number
+		^ pos_spawn
+	pos_spawn? /number
 		0
 		0
 	angle? 0
@@ -215,6 +217,10 @@ $hyoo_game_arcade $mol_stack
 		\🛑🟦⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫🟦🛑
 		\🛑🛑🟦⚫⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫🟦🎨🟦⚫⚫⚫⚫🟦🛑🛑
 		\🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
+	- map \
+		\🛑🛑🛑
+		\🛑💫🛑
+		\🛑🛑🛑
 	place_skins *
 		🎨 /string
 			\hyoo/game/arcade/texture/meme/1.jpg
@@ -246,11 +252,10 @@ $hyoo_game_arcade $mol_stack
 		map_rows => map_rows
 		map_width => map_width
 		map_height => map_height
-	guy_pos? /
-		^ spawn_pos
 	Guy $hyoo_game_actor
 		Realm <= Realm
-		pos? <=> guy_pos?
+		pos_spawn <= spawn_pos
+		pos => guy_pos
 		turn_left? => turn_left?
 		turn_right? => turn_right?
 		move_forward? => move_forward?
@@ -259,6 +264,9 @@ $hyoo_game_arcade $mol_stack
 		move_right? => move_right?
 		angle => guy_angle
 		tick => guy_tick
+	Healer $hyoo_game_actor
+		Realm <= Realm
+		pos_spawn <= spawn_pos
 	sub /
 		<= View $mol_view sub /
 			<= Guy_eye $hyoo_game_eye
@@ -277,6 +285,7 @@ $hyoo_game_arcade $mol_stack
 						texture <= Floor_image
 						transform <= ceil_trans $mol_3d_mat4
 					^ walls
+					^ avatars
 		<= Hud $mol_page
 			title <= title \$hyoo_game_arcade
 			tools /
@@ -309,7 +318,15 @@ $hyoo_game_arcade $mol_stack
 	Image* $mol_3d_image
 		uri <= image_uri* \
 	walls /$mol_3d_object
+	avatars /$mol_3d_object
 	Wall* $mol_3d_object
 		shape <= Square
 		texture <= wall_image* $mol_3d_image
 		transform <= wall_trans* $mol_3d_mat4
+	Avatar* $mol_3d_object
+		shape <= Square
+		texture <= avaatr_image* $mol_3d_image
+			uri \hyoo/game/arcade/texture/healer/0.png
+		transform <= avatar_trans* $mol_3d_mat4
+	actors /$hyoo_game_actor
+		<= Healer

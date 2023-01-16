@@ -3018,10 +3018,7 @@ var $;
             }
             spawn_pos() {
                 const place = $mol_array_lottery(this.spawn_places());
-                return [
-                    place.x,
-                    place.y,
-                ];
+                return this.pos_by_coord([place.x, place.y]);
             }
         }
         __decorate([
@@ -3036,9 +3033,6 @@ var $;
         __decorate([
             $mol_mem
         ], $hyoo_game_realm.prototype, "spawn_places", null);
-        __decorate([
-            $mol_mem
-        ], $hyoo_game_realm.prototype, "spawn_pos", null);
         $$.$hyoo_game_realm = $hyoo_game_realm;
     })($$ = $.$$ || ($.$$ = {}));
 })($ || ($ = {}));
@@ -3056,6 +3050,13 @@ var $;
             return obj;
         }
         pos(next) {
+            if (next !== undefined)
+                return next;
+            return [
+                ...this.pos_spawn()
+            ];
+        }
+        pos_spawn(next) {
             if (next !== undefined)
                 return next;
             return [
@@ -3138,6 +3139,9 @@ var $;
     __decorate([
         $mol_mem
     ], $hyoo_game_actor.prototype, "pos", null);
+    __decorate([
+        $mol_mem
+    ], $hyoo_game_actor.prototype, "pos_spawn", null);
     __decorate([
         $mol_mem
     ], $hyoo_game_actor.prototype, "angle", null);
@@ -3616,6 +3620,8 @@ var $;
             this.api.texParameterf(this.api.TEXTURE_2D_ARRAY, anisotropic.TEXTURE_MAX_ANISOTROPY_EXT, max);
             this.api.texParameteri(this.api.TEXTURE_2D_ARRAY, this.api.TEXTURE_MIN_FILTER, this.api.LINEAR_MIPMAP_LINEAR);
             this.api.texParameteri(this.api.TEXTURE_2D_ARRAY, this.api.TEXTURE_MAG_FILTER, this.api.LINEAR);
+            this.api.pixelStorei(this.api.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+            this.api.blendFunc(this.api.ONE, this.api.ONE_MINUS_SRC_ALPHA);
             this.api.generateMipmap(this.api.TEXTURE_2D_ARRAY);
             return data;
         }
@@ -3883,6 +3889,7 @@ var $;
             api.enable(api.CULL_FACE);
             api.enable(api.DEPTH_TEST);
             api.enable(api.SCISSOR_TEST);
+            api.enable(api.BLEND);
             super();
             this.api = api;
             this.native = native;
@@ -4255,7 +4262,7 @@ var $;
                 const map_height = this.Realm().map_height();
                 const [x, y] = this.pos();
                 const a = this.angle();
-                return $mol_3d_mat4.multiply($mol_3d_mat4.rotation([1, 0, 0], -Math.PI / 2), $mol_3d_mat4.rotation([0, 0, 1], a), $mol_3d_mat4.scaling([1, 1, 1]), $mol_3d_mat4.translation([-x + map_width / 2, y - map_height / 2, .25]));
+                return $mol_3d_mat4.multiply($mol_3d_mat4.rotation([1, 0, 0], -Math.PI / 2), $mol_3d_mat4.rotation([0, 0, 1], a), $mol_3d_mat4.scaling([1, 1, 1]), $mol_3d_mat4.translation([-x, y, .25]));
             }
             groups() {
                 const groups = new Map();
@@ -6387,12 +6394,8 @@ var $;
             obj.map = () => this.map();
             return obj;
         }
-        guy_pos(next) {
-            if (next !== undefined)
-                return next;
-            return [
-                ...this.spawn_pos()
-            ];
+        guy_pos() {
+            return this.Guy().pos();
         }
         turn_left(next) {
             return this.Guy().turn_left(next);
@@ -6421,7 +6424,13 @@ var $;
         Guy() {
             const obj = new this.$.$hyoo_game_actor();
             obj.Realm = () => this.Realm();
-            obj.pos = (next) => this.guy_pos(next);
+            obj.pos_spawn = () => this.spawn_pos();
+            return obj;
+        }
+        Healer() {
+            const obj = new this.$.$hyoo_game_actor();
+            obj.Realm = () => this.Realm();
+            obj.pos_spawn = () => this.spawn_pos();
             return obj;
         }
         sub() {
@@ -6452,12 +6461,27 @@ var $;
         walls() {
             return [];
         }
+        avatars() {
+            return [];
+        }
         Wall(id) {
             const obj = new this.$.$mol_3d_object();
             obj.shape = () => this.Square();
             obj.texture = () => this.wall_image(id);
             obj.transform = () => this.wall_trans(id);
             return obj;
+        }
+        Avatar(id) {
+            const obj = new this.$.$mol_3d_object();
+            obj.shape = () => this.Square();
+            obj.texture = () => this.avaatr_image(id);
+            obj.transform = () => this.avatar_trans(id);
+            return obj;
+        }
+        actors() {
+            return [
+                this.Healer()
+            ];
         }
         Floor_image() {
             const obj = new this.$.$mol_3d_image();
@@ -6495,7 +6519,8 @@ var $;
             obj.objects = () => [
                 this.Floor(),
                 this.Ceil(),
-                ...this.walls()
+                ...this.walls(),
+                ...this.avatars()
             ];
             return obj;
         }
@@ -6569,16 +6594,25 @@ var $;
             const obj = new this.$.$mol_3d_mat4();
             return obj;
         }
+        avaatr_image(id) {
+            const obj = new this.$.$mol_3d_image();
+            obj.uri = () => "hyoo/game/arcade/texture/healer/0.png";
+            return obj;
+        }
+        avatar_trans(id) {
+            const obj = new this.$.$mol_3d_mat4();
+            return obj;
+        }
     }
     __decorate([
         $mol_mem
     ], $hyoo_game_arcade.prototype, "Realm", null);
     __decorate([
         $mol_mem
-    ], $hyoo_game_arcade.prototype, "guy_pos", null);
+    ], $hyoo_game_arcade.prototype, "Guy", null);
     __decorate([
         $mol_mem
-    ], $hyoo_game_arcade.prototype, "Guy", null);
+    ], $hyoo_game_arcade.prototype, "Healer", null);
     __decorate([
         $mol_mem
     ], $hyoo_game_arcade.prototype, "Square", null);
@@ -6588,6 +6622,9 @@ var $;
     __decorate([
         $mol_mem_key
     ], $hyoo_game_arcade.prototype, "Wall", null);
+    __decorate([
+        $mol_mem_key
+    ], $hyoo_game_arcade.prototype, "Avatar", null);
     __decorate([
         $mol_mem
     ], $hyoo_game_arcade.prototype, "Floor_image", null);
@@ -6630,6 +6667,12 @@ var $;
     __decorate([
         $mol_mem_key
     ], $hyoo_game_arcade.prototype, "wall_trans", null);
+    __decorate([
+        $mol_mem_key
+    ], $hyoo_game_arcade.prototype, "avaatr_image", null);
+    __decorate([
+        $mol_mem_key
+    ], $hyoo_game_arcade.prototype, "avatar_trans", null);
     $.$hyoo_game_arcade = $hyoo_game_arcade;
 })($ || ($ = {}));
 //hyoo/game/arcade/-view.tree/arcade.view.tree.ts
@@ -6700,17 +6743,17 @@ var $;
                 const map = this.Realm().map_rows();
                 const items = this.world_items();
                 const { x, y, side } = items[index];
-                return $mol_3d_mat4.multiply($mol_3d_mat4.translation([x - map[0].length / 2 + .5, -(y - map.length / 2 + .5), 0]), $mol_3d_mat4.scaling([.5, .5, .5]), $mol_3d_mat4.rotation([1, 0, 0], Math.PI / 2), $mol_3d_mat4.rotation([0, 1, 0], side * -Math.PI / 2), $mol_3d_mat4.translation([0, 0, 1]));
+                return $mol_3d_mat4.multiply($mol_3d_mat4.translation([x + .5, -(y + .5), 0]), $mol_3d_mat4.scaling([.5, .5, .5]), $mol_3d_mat4.rotation([1, 0, 0], Math.PI / 2), $mol_3d_mat4.rotation([0, 1, 0], side * -Math.PI / 2), $mol_3d_mat4.translation([0, 0, 1]));
             }
             floor_trans() {
                 const width = this.map_width();
                 const height = this.map_height();
-                return $mol_3d_mat4.multiply($mol_3d_mat4.translation([0, 0, -.5]), $mol_3d_mat4.scaling([width / 2, height / 2, 1]));
+                return $mol_3d_mat4.multiply($mol_3d_mat4.translation([width / 2, -height / 2, -.5]), $mol_3d_mat4.scaling([width / 2, height / 2, 1]));
             }
             ceil_trans() {
                 const width = this.map_width();
                 const height = this.map_height();
-                return $mol_3d_mat4.multiply($mol_3d_mat4.translation([0, 0, .5]), $mol_3d_mat4.scaling([width / 2, -height / 2, 1]));
+                return $mol_3d_mat4.multiply($mol_3d_mat4.translation([width / 2, -height / 2, .5]), $mol_3d_mat4.scaling([width / 2, -height / 2, 1]));
             }
             square_big_skin() {
                 return new Float32Array([
@@ -6722,6 +6765,14 @@ var $;
             }
             image_uri(url) {
                 return url;
+            }
+            avatars() {
+                return this.actors().map((_, i) => this.Avatar(i));
+            }
+            avatar_trans(index) {
+                const actor = this.actors()[index];
+                const [x, y] = actor.pos();
+                return $mol_3d_mat4.multiply($mol_3d_mat4.translation([+x, -y, 0]), $mol_3d_mat4.scaling([.5, .5, .5]), $mol_3d_mat4.rotation([1, 0, 0], -Math.PI / 2));
             }
         }
         __decorate([
@@ -6745,6 +6796,12 @@ var $;
         __decorate([
             $mol_mem
         ], $hyoo_game_arcade.prototype, "square_big_skin", null);
+        __decorate([
+            $mol_mem
+        ], $hyoo_game_arcade.prototype, "avatars", null);
+        __decorate([
+            $mol_mem_key
+        ], $hyoo_game_arcade.prototype, "avatar_trans", null);
         $$.$hyoo_game_arcade = $hyoo_game_arcade;
     })($$ = $.$$ || ($.$$ = {}));
 })($ || ($ = {}));

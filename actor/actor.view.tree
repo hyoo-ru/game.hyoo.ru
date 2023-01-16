@@ -2,6 +2,8 @@ $hyoo_game_actor $mol_object2
 	Realm $hyoo_game_realm
 		place_by_pos* => place_by_pos*
 	pos? /number
+		^ pos_spawn
+	pos_spawn? /number
 		0
 		0
 	angle? 0

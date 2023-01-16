@@ -56,7 +56,7 @@ namespace $.$$ {
 			const{ x, y, side } = items[ index ]
 			
 			return $mol_3d_mat4.multiply(
-				$mol_3d_mat4.translation([ x - map[0].length / 2 + .5, -(y - map.length / 2 +.5), 0 ]),
+				$mol_3d_mat4.translation([ x  + .5, -(y  +.5), 0 ]),
 				$mol_3d_mat4.scaling([ .5, .5, .5 ]),
 				$mol_3d_mat4.rotation( [ 1, 0, 0 ], Math.PI / 2 ),
 				$mol_3d_mat4.rotation( [ 0, 1, 0 ], side * -Math.PI / 2 ),
@@ -72,7 +72,7 @@ namespace $.$$ {
 			const height = this.map_height()
 			
 			return $mol_3d_mat4.multiply(
-				$mol_3d_mat4.translation([ 0, 0, -.5 ]),
+				$mol_3d_mat4.translation([ width / 2, -height / 2, -.5 ]),
 				$mol_3d_mat4.scaling([ width / 2, height / 2, 1 ]),
 			)
 			
@@ -85,7 +85,7 @@ namespace $.$$ {
 			const height = this.map_height()
 			
 			return $mol_3d_mat4.multiply(
-				$mol_3d_mat4.translation([ 0, 0, .5 ]),
+				$mol_3d_mat4.translation([ width / 2, -height / 2, .5 ]),
 				$mol_3d_mat4.scaling([ width / 2, - height / 2, 1 ]),
 			)
 			
@@ -105,6 +105,25 @@ namespace $.$$ {
 			return url
 		}
 		
-	}
+		@ $mol_mem
+		avatars() {
+			return this.actors().map( (_,i)=> this.Avatar(i) )
+		}
 
+		@ $mol_mem_key
+		avatar_trans( index: number ) {
+			
+			const actor = this.actors()[ index ]
+			const [ x, y ] = actor.pos()
+			
+			return $mol_3d_mat4.multiply(
+				$mol_3d_mat4.translation([ +x, -y, 0 ]),
+				$mol_3d_mat4.scaling([ .5, .5, .5 ]),
+				$mol_3d_mat4.rotation( [ 1, 0, 0 ], -Math.PI / 2 ),
+			)
+
+		}
+		
+	}
+	
 }

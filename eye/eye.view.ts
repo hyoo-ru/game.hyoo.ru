@@ -83,7 +83,7 @@ namespace $.$$ {
 				$mol_3d_mat4.rotation( [ 1, 0, 0 ], - Math.PI / 2 ),
 				$mol_3d_mat4.rotation( [ 0, 0, 1 ], a ),
 				$mol_3d_mat4.scaling([ 1, 1, 1 ]),
-				$mol_3d_mat4.translation([ -x + map_width/2, y - map_height/2, .25 ]),
+				$mol_3d_mat4.translation([ -x, y, .25 ]),
 			)
 			
 		}

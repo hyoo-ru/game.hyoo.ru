@@ -1,5 +1,6 @@
 
 include \/mol/offline/install
+deploy \/hyoo/game/arcade/texture/healer/0.png
 deploy \/hyoo/game/arcade/texture/border.jpg
 deploy \/hyoo/game/arcade/texture/wall/0.jpg
 deploy \/hyoo/game/arcade/texture/wall/1.jpg

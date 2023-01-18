@@ -23,7 +23,7 @@ namespace $.$$ {
 		}
 		
 		@ $mol_mem
-		tick() {
+		auto() {
 			
 			this.$.$mol_state_time.now(0)
 			

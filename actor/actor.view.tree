@@ -19,4 +19,3 @@ $hyoo_game_actor $mol_object2
 	move_backward? false
 	move_right? false
 	move_left? false
-	tick null

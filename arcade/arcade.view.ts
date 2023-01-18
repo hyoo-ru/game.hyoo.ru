@@ -51,12 +51,11 @@ namespace $.$$ {
 		@ $mol_mem_key
 		wall_trans( index: number ) {
 			
-			const map = this.Realm().map_rows()
 			const items = this.world_items()
 			const{ x, y, side } = items[ index ]
 			
 			return $mol_3d_mat4.multiply(
-				$mol_3d_mat4.translation([ x  + .5, -(y  +.5), 0 ]),
+				$mol_3d_mat4.translation([ x + .5, -y -.5, 0 ]),
 				$mol_3d_mat4.scaling([ .5, .5, .5 ]),
 				$mol_3d_mat4.rotation( [ 1, 0, 0 ], Math.PI / 2 ),
 				$mol_3d_mat4.rotation( [ 0, 1, 0 ], side * -Math.PI / 2 ),
@@ -119,9 +118,17 @@ namespace $.$$ {
 			return $mol_3d_mat4.multiply(
 				$mol_3d_mat4.translation([ +x, -y, 0 ]),
 				$mol_3d_mat4.scaling([ .5, .5, .5 ]),
+				$mol_3d_mat4.rotation( [ 0, 0, 1 ], -actor.angle() ),
 				$mol_3d_mat4.rotation( [ 1, 0, 0 ], -Math.PI / 2 ),
 			)
 
+		}
+		
+		@ $mol_mem
+		auto() {
+			for( const actor of this.actors() ) {
+				actor.auto()
+			}
 		}
 		
 	}

@@ -120,14 +120,14 @@ namespace $.$$ {
 			return ids
 		}
 		
-		@ $mol_mem_key
+		// @ $mol_mem_key
 		group_trans( shape: $mol_3d_shape ) {
 			
 			const program = this.program()
 			const objects = this.groups().get( shape )!
 			
-			program.geometry( shape ).use( geometry => {
-				program.param( 'inst_trans' )!.matrices([ 4, 4 ]).send(
+			return program.geometry( shape ).use( geometry => {
+				return program.param( 'inst_trans' )!.matrices([ 4, 4 ]).send(
 					objects.map( obj => obj.transform() )
 				)
 			} )
@@ -156,7 +156,7 @@ namespace $.$$ {
 			
 		}
 		
-		@ $mol_mem_key
+		// @ $mol_mem_key
 		prepare_group( shape: $mol_3d_shape ) {
 			
 			const program = this.program()
@@ -173,7 +173,7 @@ namespace $.$$ {
 			
 		}
 		
-		@ $mol_mem
+		// @ $mol_mem
 		prepare() {
 			return new Map( [ ... this.groups().keys() ].map(
 				shape => [ shape, this.prepare_group( shape ) ]

@@ -3050,6 +3050,9 @@ var $;
 var $;
 (function ($) {
     class $hyoo_game_actor extends $mol_object2 {
+        auto() {
+            return null;
+        }
         place_by_pos(id) {
             return this.Realm().place_by_pos(id);
         }
@@ -3136,9 +3139,6 @@ var $;
             if (next !== undefined)
                 return next;
             return false;
-        }
-        tick() {
-            return null;
         }
     }
     __decorate([
@@ -3247,7 +3247,7 @@ var $;
                     return -this.turn_speed_max();
                 return 0;
             }
-            tick() {
+            auto() {
                 this.$.$mol_state_time.now(0);
                 const move_speed_track = this.move_speed_track();
                 const move_speed_side = this.move_speed_side();
@@ -3284,7 +3284,7 @@ var $;
         ], $hyoo_game_actor.prototype, "turn_speed", null);
         __decorate([
             $mol_mem
-        ], $hyoo_game_actor.prototype, "tick", null);
+        ], $hyoo_game_actor.prototype, "auto", null);
         $$.$hyoo_game_actor = $hyoo_game_actor;
     })($$ = $.$$ || ($.$$ = {}));
 })($ || ($ = {}));
@@ -3588,6 +3588,37 @@ var $;
     $.$mol_3d_object = $mol_3d_object;
 })($ || ($ = {}));
 //mol/3d/object/object.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $hyoo_game_actor_ghost extends $hyoo_game_actor {
+    }
+    $.$hyoo_game_actor_ghost = $hyoo_game_actor_ghost;
+})($ || ($ = {}));
+//hyoo/game/actor/ghost/-view.tree/ghost.view.tree.ts
+;
+"use strict";
+var $;
+(function ($) {
+    var $$;
+    (function ($$) {
+        class $hyoo_game_actor_ghost extends $.$hyoo_game_actor_ghost {
+            auto() {
+                this.$.$mol_state_time.now(1000);
+                this.move_forward(Math.random() > .5);
+                this.turn_left(Math.random() > .5);
+                this.turn_right(Math.random() > .5);
+                super.auto();
+            }
+        }
+        __decorate([
+            $mol_mem
+        ], $hyoo_game_actor_ghost.prototype, "auto", null);
+        $$.$hyoo_game_actor_ghost = $hyoo_game_actor_ghost;
+    })($$ = $.$$ || ($.$$ = {}));
+})($ || ($ = {}));
+//hyoo/game/actor/ghost/ghost.view.ts
 ;
 "use strict";
 var $;
@@ -4299,8 +4330,8 @@ var $;
             group_trans(shape) {
                 const program = this.program();
                 const objects = this.groups().get(shape);
-                program.geometry(shape).use(geometry => {
-                    program.param('inst_trans').matrices([4, 4]).send(objects.map(obj => obj.transform()));
+                return program.geometry(shape).use(geometry => {
+                    return program.param('inst_trans').matrices([4, 4]).send(objects.map(obj => obj.transform()));
                 });
             }
             group_skin(shape) {
@@ -4380,19 +4411,10 @@ var $;
         ], $hyoo_game_eye.prototype, "group_textures", null);
         __decorate([
             $mol_mem_key
-        ], $hyoo_game_eye.prototype, "group_trans", null);
-        __decorate([
-            $mol_mem_key
         ], $hyoo_game_eye.prototype, "group_skin", null);
         __decorate([
             $mol_mem_key
         ], $hyoo_game_eye.prototype, "group_vertex", null);
-        __decorate([
-            $mol_mem_key
-        ], $hyoo_game_eye.prototype, "prepare_group", null);
-        __decorate([
-            $mol_mem
-        ], $hyoo_game_eye.prototype, "prepare", null);
         __decorate([
             $mol_mem
         ], $hyoo_game_eye.prototype, "texture_map", null);
@@ -6402,44 +6424,11 @@ var $;
             obj.map = () => this.map();
             return obj;
         }
-        guy_pos() {
-            return this.Guy().pos();
-        }
-        turn_left(next) {
-            return this.Guy().turn_left(next);
-        }
-        turn_right(next) {
-            return this.Guy().turn_right(next);
-        }
-        move_forward(next) {
-            return this.Guy().move_forward(next);
-        }
-        move_backward(next) {
-            return this.Guy().move_backward(next);
-        }
-        move_left(next) {
-            return this.Guy().move_left(next);
-        }
-        move_right(next) {
-            return this.Guy().move_right(next);
-        }
-        guy_angle() {
-            return this.Guy().angle();
-        }
-        guy_tick() {
-            return this.Guy().tick();
-        }
-        Guy() {
-            const obj = new this.$.$hyoo_game_actor();
-            obj.Realm = () => this.Realm();
-            obj.pos_spawn = () => this.spawn_pos();
-            return obj;
-        }
-        Healer() {
-            const obj = new this.$.$hyoo_game_actor();
-            obj.Realm = () => this.Realm();
-            obj.pos_spawn = () => this.spawn_pos();
-            return obj;
+        actors() {
+            return [
+                this.Guy(),
+                this.Healer()
+            ];
         }
         sub() {
             return [
@@ -6450,11 +6439,6 @@ var $;
         plugins() {
             return [
                 this.Control()
-            ];
-        }
-        auto() {
-            return [
-                this.guy_tick()
             ];
         }
         Square() {
@@ -6486,10 +6470,41 @@ var $;
             obj.transform = () => this.avatar_trans(id);
             return obj;
         }
-        actors() {
-            return [
-                this.Healer()
-            ];
+        guy_pos() {
+            return this.Guy().pos();
+        }
+        turn_left(next) {
+            return this.Guy().turn_left(next);
+        }
+        turn_right(next) {
+            return this.Guy().turn_right(next);
+        }
+        move_forward(next) {
+            return this.Guy().move_forward(next);
+        }
+        move_backward(next) {
+            return this.Guy().move_backward(next);
+        }
+        move_left(next) {
+            return this.Guy().move_left(next);
+        }
+        move_right(next) {
+            return this.Guy().move_right(next);
+        }
+        guy_angle() {
+            return this.Guy().angle();
+        }
+        Guy() {
+            const obj = new this.$.$hyoo_game_actor();
+            obj.Realm = () => this.Realm();
+            obj.pos_spawn = () => this.spawn_pos();
+            return obj;
+        }
+        Healer() {
+            const obj = new this.$.$hyoo_game_actor_ghost();
+            obj.Realm = () => this.Realm();
+            obj.pos_spawn = () => this.spawn_pos();
+            return obj;
         }
         Floor_image() {
             const obj = new this.$.$mol_3d_image();
@@ -6617,12 +6632,6 @@ var $;
     ], $hyoo_game_arcade.prototype, "Realm", null);
     __decorate([
         $mol_mem
-    ], $hyoo_game_arcade.prototype, "Guy", null);
-    __decorate([
-        $mol_mem
-    ], $hyoo_game_arcade.prototype, "Healer", null);
-    __decorate([
-        $mol_mem
     ], $hyoo_game_arcade.prototype, "Square", null);
     __decorate([
         $mol_mem_key
@@ -6633,6 +6642,12 @@ var $;
     __decorate([
         $mol_mem_key
     ], $hyoo_game_arcade.prototype, "Avatar", null);
+    __decorate([
+        $mol_mem
+    ], $hyoo_game_arcade.prototype, "Guy", null);
+    __decorate([
+        $mol_mem
+    ], $hyoo_game_arcade.prototype, "Healer", null);
     __decorate([
         $mol_mem
     ], $hyoo_game_arcade.prototype, "Floor_image", null);
@@ -6748,10 +6763,9 @@ var $;
                 return this.Image(url);
             }
             wall_trans(index) {
-                const map = this.Realm().map_rows();
                 const items = this.world_items();
                 const { x, y, side } = items[index];
-                return $mol_3d_mat4.multiply($mol_3d_mat4.translation([x + .5, -(y + .5), 0]), $mol_3d_mat4.scaling([.5, .5, .5]), $mol_3d_mat4.rotation([1, 0, 0], Math.PI / 2), $mol_3d_mat4.rotation([0, 1, 0], side * -Math.PI / 2), $mol_3d_mat4.translation([0, 0, 1]));
+                return $mol_3d_mat4.multiply($mol_3d_mat4.translation([x + .5, -y - .5, 0]), $mol_3d_mat4.scaling([.5, .5, .5]), $mol_3d_mat4.rotation([1, 0, 0], Math.PI / 2), $mol_3d_mat4.rotation([0, 1, 0], side * -Math.PI / 2), $mol_3d_mat4.translation([0, 0, 1]));
             }
             floor_trans() {
                 const width = this.map_width();
@@ -6780,7 +6794,12 @@ var $;
             avatar_trans(index) {
                 const actor = this.actors()[index];
                 const [x, y] = actor.pos();
-                return $mol_3d_mat4.multiply($mol_3d_mat4.translation([+x, -y, 0]), $mol_3d_mat4.scaling([.5, .5, .5]), $mol_3d_mat4.rotation([1, 0, 0], -Math.PI / 2));
+                return $mol_3d_mat4.multiply($mol_3d_mat4.translation([+x, -y, 0]), $mol_3d_mat4.scaling([.5, .5, .5]), $mol_3d_mat4.rotation([0, 0, 1], -actor.angle()), $mol_3d_mat4.rotation([1, 0, 0], -Math.PI / 2));
+            }
+            auto() {
+                for (const actor of this.actors()) {
+                    actor.auto();
+                }
             }
         }
         __decorate([
@@ -6810,6 +6829,9 @@ var $;
         __decorate([
             $mol_mem_key
         ], $hyoo_game_arcade.prototype, "avatar_trans", null);
+        __decorate([
+            $mol_mem
+        ], $hyoo_game_arcade.prototype, "auto", null);
         $$.$hyoo_game_arcade = $hyoo_game_arcade;
     })($$ = $.$$ || ($.$$ = {}));
 })($ || ($ = {}));

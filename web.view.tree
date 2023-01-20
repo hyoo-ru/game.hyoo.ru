@@ -10,6 +10,7 @@ $hyoo_game_realm $mol_object2
 		0
 
 $hyoo_game_actor $mol_object2
+	auto null
 	Realm $hyoo_game_realm
 		place_by_pos* => place_by_pos*
 	pos? /number
@@ -30,7 +31,8 @@ $hyoo_game_actor $mol_object2
 	move_backward? false
 	move_right? false
 	move_left? false
-	tick null
+
+$hyoo_game_actor_ghost $hyoo_game_actor
 
 $mol_3d_pane $mol_view
 	dom_name \canvas
@@ -252,21 +254,21 @@ $hyoo_game_arcade $mol_stack
 		map_rows => map_rows
 		map_width => map_width
 		map_height => map_height
-	Guy $hyoo_game_actor
-		Realm <= Realm
-		pos_spawn <= spawn_pos
-		pos => guy_pos
-		turn_left? => turn_left?
-		turn_right? => turn_right?
-		move_forward? => move_forward?
-		move_backward? => move_backward?
-		move_left? => move_left?
-		move_right? => move_right?
-		angle => guy_angle
-		tick => guy_tick
-	Healer $hyoo_game_actor
-		Realm <= Realm
-		pos_spawn <= spawn_pos
+	actors /$hyoo_game_actor
+		<= Guy $hyoo_game_actor
+			Realm <= Realm
+			pos_spawn <= spawn_pos
+			pos => guy_pos
+			turn_left? => turn_left?
+			turn_right? => turn_right?
+			move_forward? => move_forward?
+			move_backward? => move_backward?
+			move_left? => move_left?
+			move_right? => move_right?
+			angle => guy_angle
+		<= Healer $hyoo_game_actor_ghost
+			Realm <= Realm
+			pos_spawn <= spawn_pos
 	sub /
 		<= View $mol_view sub /
 			<= Guy_eye $hyoo_game_eye
@@ -311,8 +313,6 @@ $hyoo_game_arcade $mol_stack
 				right? <=> turn_right?
 				pageUp? <=> move_left?
 				pageDown? <=> move_right?
-	auto /
-		<= guy_tick
 	-
 	Square $mol_3d_shape_square
 	Image* $mol_3d_image
@@ -328,5 +328,3 @@ $hyoo_game_arcade $mol_stack
 		texture <= avaatr_image* $mol_3d_image
 			uri \hyoo/game/arcade/texture/healer/0.png
 		transform <= avatar_trans* $mol_3d_mat4
-	actors /$hyoo_game_actor
-		<= Healer

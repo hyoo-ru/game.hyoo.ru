@@ -109,6 +109,7 @@
     "$mol_wire_sync",
     "$mol_3d_object",
     "$mol_3d_mat4",
+    "$hyoo_game_actor_ghost",
     "$hyoo_game_eye",
     "$mol_3d_pane",
     "$mol_3d_context",

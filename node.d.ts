@@ -908,6 +908,7 @@ declare namespace $.$$ {
 
 declare namespace $ {
     class $hyoo_game_actor extends $mol_object2 {
+        auto(): any;
         place_by_pos(id: any): string;
         Realm(): $$.$hyoo_game_realm;
         pos(next?: any): readonly number[];
@@ -925,7 +926,6 @@ declare namespace $ {
         move_backward(next?: any): boolean;
         move_right(next?: any): boolean;
         move_left(next?: any): boolean;
-        tick(): any;
     }
 }
 
@@ -941,7 +941,7 @@ declare namespace $.$$ {
         move_speed_track(): number;
         move_speed_side(): number;
         turn_speed(): number;
-        tick(): void;
+        auto(): void;
     }
 }
 
@@ -991,6 +991,17 @@ declare namespace $ {
         shape(): $mol_3d_shape;
         texture(): $mol_3d_image;
         transform(): $mol_3d_mat4;
+    }
+}
+
+declare namespace $ {
+    class $hyoo_game_actor_ghost extends $hyoo_game_actor {
+    }
+}
+
+declare namespace $.$$ {
+    class $hyoo_game_actor_ghost extends $.$hyoo_game_actor_ghost {
+        auto(): void;
     }
 }
 
@@ -1167,7 +1178,7 @@ declare namespace $.$$ {
         view_matrix(): $mol_3d_mat4;
         groups(): Map<$mol_3d_shape, $mol_3d_object[]>;
         group_textures(shape: $mol_3d_shape): any[];
-        group_trans(shape: $mol_3d_shape): void;
+        group_trans(shape: $mol_3d_shape): $mol_3d_geometry;
         group_skin(shape: $mol_3d_shape): void;
         group_vertex(shape: $mol_3d_shape): void;
         prepare_group(shape: $mol_3d_shape): $mol_3d_geometry;
@@ -1888,6 +1899,15 @@ declare namespace $ {
         map_width(): number;
         map_height(): number;
         Realm(): $$.$hyoo_game_realm;
+        actors(): readonly $hyoo_game_actor[];
+        sub(): readonly any[];
+        plugins(): readonly any[];
+        Square(): $mol_3d_shape_square;
+        Image(id: any): $mol_3d_image;
+        walls(): readonly $mol_3d_object[];
+        avatars(): readonly $mol_3d_object[];
+        Wall(id: any): $mol_3d_object;
+        Avatar(id: any): $mol_3d_object;
         guy_pos(): readonly number[];
         turn_left(next?: any): boolean;
         turn_right(next?: any): boolean;
@@ -1896,19 +1916,8 @@ declare namespace $ {
         move_left(next?: any): boolean;
         move_right(next?: any): boolean;
         guy_angle(): number;
-        guy_tick(): void;
         Guy(): $$.$hyoo_game_actor;
-        Healer(): $$.$hyoo_game_actor;
-        sub(): readonly any[];
-        plugins(): readonly any[];
-        auto(): readonly any[];
-        Square(): $mol_3d_shape_square;
-        Image(id: any): $mol_3d_image;
-        walls(): readonly $mol_3d_object[];
-        avatars(): readonly $mol_3d_object[];
-        Wall(id: any): $mol_3d_object;
-        Avatar(id: any): $mol_3d_object;
-        actors(): readonly $hyoo_game_actor[];
+        Healer(): $$.$hyoo_game_actor_ghost;
         Floor_image(): $mol_3d_image;
         floor_trans(): $mol_3d_mat4;
         Floor(): $mol_3d_object;
@@ -1952,6 +1961,7 @@ declare namespace $.$$ {
         image_uri(url: string): string;
         avatars(): $mol_3d_object[];
         avatar_trans(index: number): $mol_3d_mat4;
+        auto(): void;
     }
 }
 

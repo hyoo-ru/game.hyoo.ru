@@ -974,6 +974,14 @@ declare namespace $ {
 }
 
 declare namespace $ {
+    let $mol_3d_glsl_both: string;
+    let $mol_3d_glsl_vert: string;
+    let $mol_3d_glsl_frag: string;
+}
+
+declare namespace $ { }
+
+declare namespace $ {
     class $mol_3d_mat4 extends Float32Array {
         static identity(): $mol_3d_mat4;
         static translation([x, y, z]: Float32List): $mol_3d_mat4;
@@ -1097,6 +1105,7 @@ declare namespace $ {
         readonly native: WebGL2RenderingContext;
         constructor(native: WebGL2RenderingContext);
         shader(type: GLenum, code: string): WebGLShader;
+        func<Face extends $mol_3d_program_face>(name: string, face: Face): $mol_3d_program<Face>;
         program<Face extends $mol_3d_program_face>(face: Face, vertex: string, fragment: string): $mol_3d_program<Face>;
     }
 }
@@ -1146,29 +1155,33 @@ declare namespace $ {
     };
 }
 
+declare namespace $ { }
+
+declare namespace $ { }
+
 declare namespace $.$$ {
     class $hyoo_game_eye extends $.$hyoo_game_eye {
         program(): $mol_3d_program<{
             glob: {
                 wireframe: "float";
-                proj: "mat4";
-                view: "mat4";
-                Texture: "sampler2DArray";
+                projTrans: "mat4";
+                viewTrans: "mat4";
+                textures: "sampler2DArray";
             };
             input: {
-                vertex_pos: "vec4";
-                vertex_tex_pos: "vec2";
-                inst_trans: "mat4";
-                inst_tex: "float";
+                vertexCoord: "vec4";
+                texOffset: "vec2";
+                instTrans: "mat4";
+                instTex: "float";
             };
             pipe: {
-                world_pos: "vec4";
-                view_pos: "vec4";
-                texture_id: "float";
-                texture_pos: "vec2";
-                texture_scale: "vec2";
-                instance_id: "float";
-                vertex_id: "float";
+                worldPos: "vec4";
+                viewPos: "vec4";
+                texId: "float";
+                textPos: "vec2";
+                texScale: "vec2";
+                instId: "float";
+                vertexId: "float";
             };
             output: {
                 color: "vec4";

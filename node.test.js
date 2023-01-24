@@ -3416,6 +3416,22 @@ var $;
 "use strict";
 var $;
 (function ($) {
+    $.$mol_3d_glsl_both = '';
+    $.$mol_3d_glsl_vert = '';
+    $.$mol_3d_glsl_frag = '';
+})($ || ($ = {}));
+//mol/3d/glsl/glsl.ts
+;
+"use strict";
+var $;
+(function ($) {
+    $.$mol_3d_glsl_both += "// vector of scales by transformation matrix\nvec4 mol_3d_mat4_scales( in mat4 trans ) {\n\treturn vec4(\n\t\tlength( trans[0] ),\n\t\tlength( trans[1] ),\n\t\tlength( trans[2] ),\n\t\tlength( trans[3] )\n\t);\n}\n";
+})($ || ($ = {}));
+//mol/3d/mat4/-glsl/mat4.glsl.ts
+;
+"use strict";
+var $;
+(function ($) {
     class $mol_3d_mat4 extends Float32Array {
         static identity() {
             return new $mol_3d_mat4([
@@ -4001,6 +4017,9 @@ var $;
             gl.deleteShader(shader);
             throw new Error(String(log));
         }
+        func(name, face) {
+            return this.program(face, $mol_3d_glsl_both + $mol_3d_glsl_vert + `void main() { ${name}(); }`, $mol_3d_glsl_both + $mol_3d_glsl_frag + `void main() { ${name}(); }`);
+        }
         program(face, vertex, fragment) {
             const gl = this.native;
             const program = gl.createProgram();
@@ -4221,66 +4240,50 @@ var $;
 "use strict";
 var $;
 (function ($) {
+    $.$mol_3d_glsl_frag += "void hyoo_game_eye() {\n\t\n\tfloat dim = min( 1.0, 3.0 / pow( length( viewPos ), 2.0 ) );\n\t\n\tif( wireframe == 1.0 ) {\n\t\t\n\t\tcolor = dim * vec4( 1, 1, 1, 1 );\n\t\t\n\t} else {\n\t\t\n\t\tvec3 coord = vec3( textPos * texScale, round(texId) );\n\t\t\n\t\tcolor = texture( textures, coord );\n\t\tcolor = vec4( color.rgb * dim, color.a );\n\t\t\n\t}\n\t\n}\n";
+})($ || ($ = {}));
+//hyoo/game/eye/-glsl/eye.frag.glsl.ts
+;
+"use strict";
+var $;
+(function ($) {
+    $.$mol_3d_glsl_vert += "void hyoo_game_eye() {\n\t\n\tvec4 viewShift = vec4( 0, 0, - wireframe * 0.01, 0 );\n\t\n\tworldPos = instTrans * vertexCoord;\n\tviewPos = viewTrans * worldPos;\n\t\n\tgl_Position = projTrans * viewPos + viewShift;\n\tgl_PointSize = 5.0;\n\t\n\ttexId = float( instTex );\n\ttextPos = texOffset;\n\t\n\tinstId = float( gl_InstanceID );\n\tvertexId = float( gl_VertexID );\n\t\n\ttexScale = 2.0 * mol_3d_mat4_scales( instTrans ).xy;\n\t\n}\n";
+})($ || ($ = {}));
+//hyoo/game/eye/-glsl/eye.vert.glsl.ts
+;
+"use strict";
+var $;
+(function ($) {
     var $$;
     (function ($$) {
         class $hyoo_game_eye extends $.$hyoo_game_eye {
             program() {
-                return this.context().program({
+                return this.context().func('hyoo_game_eye', {
                     glob: {
                         wireframe: 'float',
-                        proj: 'mat4',
-                        view: 'mat4',
-                        Texture: 'sampler2DArray',
+                        projTrans: 'mat4',
+                        viewTrans: 'mat4',
+                        textures: 'sampler2DArray',
                     },
                     input: {
-                        vertex_pos: 'vec4',
-                        vertex_tex_pos: 'vec2',
-                        inst_trans: 'mat4',
-                        inst_tex: 'float',
+                        vertexCoord: 'vec4',
+                        texOffset: 'vec2',
+                        instTrans: 'mat4',
+                        instTex: 'float',
                     },
                     pipe: {
-                        world_pos: 'vec4',
-                        view_pos: 'vec4',
-                        texture_id: 'float',
-                        texture_pos: 'vec2',
-                        texture_scale: 'vec2',
-                        instance_id: 'float',
-                        vertex_id: 'float',
+                        worldPos: 'vec4',
+                        viewPos: 'vec4',
+                        texId: 'float',
+                        textPos: 'vec2',
+                        texScale: 'vec2',
+                        instId: 'float',
+                        vertexId: 'float',
                     },
                     output: {
                         color: 'vec4',
                     },
-                }, `
-				void main() {
-					vec4 view_shift = vec4( 0, 0, - wireframe * 0.01, 0 );
-					world_pos = inst_trans * vertex_pos;
-					view_pos = view * world_pos;
-					gl_Position = proj * view_pos + view_shift;
-					gl_PointSize = 5.0;
-					texture_id = float(inst_tex);
-					texture_pos = vertex_tex_pos;
-					instance_id = float(gl_InstanceID);
-					vertex_id = float(gl_VertexID);
-					
-					texture_scale = 2.0 * vec2(
-						length(inst_trans[0]),
-						length(inst_trans[1])
-					);
-					
-				}
-				
-			`, `
-				void main() {
-					float dim = min( 1.0, 3.0 / pow( length( view_pos ), 2.0 ) );
-					if( wireframe == 1.0 ) {
-						color = dim * vec4( 1, 1, 1, 1 );
-					} else {
-						vec3 coord = vec3( texture_pos * texture_scale, round(texture_id) );
-						color = texture( Texture, coord );
-						color = vec4( color.rgb * dim, color.a );
-					}
-				}
-			`);
+                });
             }
             proj_matrix() {
                 let aspect = this.width() / this.height();
@@ -4315,7 +4318,7 @@ var $;
                     ids[i] = new Float32Array([map.get(objects[i].texture())]);
                 }
                 program.geometry(shape).use(geometry => {
-                    program.param('inst_tex').vectors(1).send(ids);
+                    program.param('instTex').vectors(1).send(ids);
                 });
                 return ids;
             }
@@ -4323,19 +4326,19 @@ var $;
                 const program = this.program();
                 const objects = this.groups().get(shape);
                 return program.geometry(shape).use(geometry => {
-                    return program.param('inst_trans').matrices([4, 4]).send(objects.map(obj => obj.transform()));
+                    return program.param('instTrans').matrices([4, 4]).send(objects.map(obj => obj.transform()));
                 });
             }
             group_skin(shape) {
                 const program = this.program();
                 program.geometry(shape).use(geometry => {
-                    program.param('vertex_tex_pos').vector(2).send([shape.skin()]);
+                    program.param('texOffset').vector(2).send([shape.skin()]);
                 });
             }
             group_vertex(shape) {
                 const program = this.program();
                 program.geometry(shape).use(geometry => {
-                    program.param('vertex_pos').vector(3).send([shape.geometry()]);
+                    program.param('vertexCoord').vector(3).send([shape.geometry()]);
                 });
             }
             prepare_group(shape) {
@@ -4365,13 +4368,13 @@ var $;
             }
             textures() {
                 const textures = $mol_wire_race(...[...this.texture_map().keys()].map(image => () => image.data()));
-                return this.program().glob('Texture').texture().send_multi(textures);
+                return this.program().glob('textures').texture().send_multi(textures);
             }
             paint() {
                 this.program().use(program => {
                     this.textures();
-                    program.glob('proj').matrix(this.proj_matrix());
-                    program.glob('view').matrix(this.view_matrix());
+                    program.glob('projTrans').matrix(this.proj_matrix());
+                    program.glob('viewTrans').matrix(this.view_matrix());
                     for (const [shape, geometry] of this.prepare().entries()) {
                         geometry.use(() => {
                             program.strips(0, shape.size(), geometry.count);

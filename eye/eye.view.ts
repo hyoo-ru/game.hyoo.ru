@@ -4,64 +4,32 @@ namespace $.$$ {
 		
 		@ $mol_mem
 		program() {
-			return this.context().program(
-				{
-					glob: {
-						wireframe: 'float',
-						proj: 'mat4',
-						view: 'mat4',
-						Texture: 'sampler2DArray',
-					},
-					input: {
-						vertex_pos: 'vec4',
-						vertex_tex_pos: 'vec2',
-						inst_trans: 'mat4',
-						inst_tex: 'float',
-					},
-					pipe: {
-						world_pos: 'vec4',
-						view_pos: 'vec4',
-						texture_id: 'float',
-						texture_pos: 'vec2',
-						texture_scale: 'vec2',
-						instance_id: 'float',
-						vertex_id: 'float',
-					},
-					output: {
-						color: 'vec4',	
-					},
-				}
-			,`
-				void main() {
-					vec4 view_shift = vec4( 0, 0, - wireframe * 0.01, 0 );
-					world_pos = inst_trans * vertex_pos;
-					view_pos = view * world_pos;
-					gl_Position = proj * view_pos + view_shift;
-					gl_PointSize = 5.0;
-					texture_id = float(inst_tex);
-					texture_pos = vertex_tex_pos;
-					instance_id = float(gl_InstanceID);
-					vertex_id = float(gl_VertexID);
-					
-					texture_scale = 2.0 * vec2(
-						length(inst_trans[0]),
-						length(inst_trans[1])
-					);
-					
-				}
-				
-			`, `
-				void main() {
-					float dim = min( 1.0, 3.0 / pow( length( view_pos ), 2.0 ) );
-					if( wireframe == 1.0 ) {
-						color = dim * vec4( 1, 1, 1, 1 );
-					} else {
-						vec3 coord = vec3( texture_pos * texture_scale, round(texture_id) );
-						color = texture( Texture, coord );
-						color = vec4( color.rgb * dim, color.a );
-					}
-				}
-			` )
+			return this.context().func( 'hyoo_game_eye', {
+				glob: {
+					wireframe: 'float',
+					projTrans: 'mat4',
+					viewTrans: 'mat4',
+					textures: 'sampler2DArray',
+				},
+				input: {
+					vertexCoord: 'vec4',
+					texOffset: 'vec2',
+					instTrans: 'mat4',
+					instTex: 'float',
+				},
+				pipe: {
+					worldPos: 'vec4',
+					viewPos: 'vec4',
+					texId: 'float',
+					textPos: 'vec2',
+					texScale: 'vec2',
+					instId: 'float',
+					vertexId: 'float',
+				},
+				output: {
+					color: 'vec4',
+				},
+			} )
 		}
 		
 		@ $mol_mem
@@ -114,7 +82,7 @@ namespace $.$$ {
 			}
 			
 			program.geometry( shape ).use( geometry => {
-				program.param( 'inst_tex' )!.vectors( 1 ).send( ids )
+				program.param( 'instTex' )!.vectors( 1 ).send( ids )
 			} )
 			
 			return ids
@@ -127,7 +95,7 @@ namespace $.$$ {
 			const objects = this.groups().get( shape )!
 			
 			return program.geometry( shape ).use( geometry => {
-				return program.param( 'inst_trans' )!.matrices([ 4, 4 ]).send(
+				return program.param( 'instTrans' )!.matrices([ 4, 4 ]).send(
 					objects.map( obj => obj.transform() )
 				)
 			} )
@@ -140,7 +108,7 @@ namespace $.$$ {
 			const program = this.program()
 			
 			program.geometry( shape ).use( geometry => {
-				program.param( 'vertex_tex_pos' )!.vector( 2 ).send([ shape.skin() ])
+				program.param( 'texOffset' )!.vector( 2 ).send([ shape.skin() ])
 			} )
 			
 		}
@@ -151,7 +119,7 @@ namespace $.$$ {
 			const program = this.program()
 			
 			program.geometry( shape ).use( geometry => {
-				program.param( 'vertex_pos' )!.vector( 3 ).send([ shape.geometry() ])
+				program.param( 'vertexCoord' )!.vector( 3 ).send([ shape.geometry() ])
 			} )
 			
 		}
@@ -206,7 +174,7 @@ namespace $.$$ {
 				... [ ... this.texture_map().keys() ].map( image => ()=> image.data() )
 			)
 			
-			return this.program().glob( 'Texture' ).texture().send_multi( textures )
+			return this.program().glob( 'textures' ).texture().send_multi( textures )
 			
 		}
 		
@@ -216,8 +184,8 @@ namespace $.$$ {
 				
 				this.textures()
 				
-				program.glob( 'proj' ).matrix( this.proj_matrix() )
-				program.glob( 'view' ).matrix( this.view_matrix() )
+				program.glob( 'projTrans' ).matrix( this.proj_matrix() )
+				program.glob( 'viewTrans' ).matrix( this.view_matrix() )
 				
 				for( const [ shape, geometry ] of this.prepare().entries() ) {
 					geometry.use( ()=> {

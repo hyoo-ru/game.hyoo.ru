@@ -41,6 +41,70 @@ var $;
 "use strict";
 var $;
 (function ($) {
+    class $mol_decor {
+        value;
+        constructor(value) {
+            this.value = value;
+        }
+        prefix() { return ''; }
+        valueOf() { return this.value; }
+        postfix() { return ''; }
+        toString() {
+            return `${this.prefix()}${this.valueOf()}${this.postfix()}`;
+        }
+    }
+    $.$mol_decor = $mol_decor;
+})($ || ($ = {}));
+//mol/decor/decor.ts
+;
+"use strict";
+var $;
+(function ($) {
+    class $mol_style_unit extends $mol_decor {
+        literal;
+        constructor(value, literal) {
+            super(value);
+            this.literal = literal;
+        }
+        postfix() {
+            return this.literal;
+        }
+        static per(value) { return new $mol_style_unit(value, '%'); }
+        static px(value) { return new $mol_style_unit(value, 'px'); }
+        static mm(value) { return new $mol_style_unit(value, 'mm'); }
+        static cm(value) { return new $mol_style_unit(value, 'cm'); }
+        static Q(value) { return new $mol_style_unit(value, 'Q'); }
+        static in(value) { return new $mol_style_unit(value, 'in'); }
+        static pc(value) { return new $mol_style_unit(value, 'pc'); }
+        static pt(value) { return new $mol_style_unit(value, 'pt'); }
+        static cap(value) { return new $mol_style_unit(value, 'cap'); }
+        static ch(value) { return new $mol_style_unit(value, 'ch'); }
+        static em(value) { return new $mol_style_unit(value, 'em'); }
+        static rem(value) { return new $mol_style_unit(value, 'rem'); }
+        static ex(value) { return new $mol_style_unit(value, 'ex'); }
+        static ic(value) { return new $mol_style_unit(value, 'ic'); }
+        static lh(value) { return new $mol_style_unit(value, 'lh'); }
+        static rlh(value) { return new $mol_style_unit(value, 'rlh'); }
+        static vh(value) { return new $mol_style_unit(value, 'vh'); }
+        static vw(value) { return new $mol_style_unit(value, 'vw'); }
+        static vi(value) { return new $mol_style_unit(value, 'vi'); }
+        static vb(value) { return new $mol_style_unit(value, 'vb'); }
+        static vmin(value) { return new $mol_style_unit(value, 'vmin'); }
+        static vmax(value) { return new $mol_style_unit(value, 'vmax'); }
+        static deg(value) { return new $mol_style_unit(value, 'deg'); }
+        static rad(value) { return new $mol_style_unit(value, 'rad'); }
+        static grad(value) { return new $mol_style_unit(value, 'grad'); }
+        static turn(value) { return new $mol_style_unit(value, 'turn'); }
+        static s(value) { return new $mol_style_unit(value, 's'); }
+        static ms(value) { return new $mol_style_unit(value, 'ms'); }
+    }
+    $.$mol_style_unit = $mol_style_unit;
+})($ || ($ = {}));
+//mol/style/unit/unit.ts
+;
+"use strict";
+var $;
+(function ($) {
     $.$mol_ambient_ref = Symbol('$mol_ambient_ref');
     function $mol_ambient(overrides) {
         return Object.setPrototypeOf(overrides, this || $);
@@ -786,70 +850,6 @@ var $;
     $.$mol_style_attach = $mol_style_attach;
 })($ || ($ = {}));
 //mol/style/attach/attach.ts
-;
-"use strict";
-var $;
-(function ($) {
-    class $mol_decor {
-        value;
-        constructor(value) {
-            this.value = value;
-        }
-        prefix() { return ''; }
-        valueOf() { return this.value; }
-        postfix() { return ''; }
-        toString() {
-            return `${this.prefix()}${this.valueOf()}${this.postfix()}`;
-        }
-    }
-    $.$mol_decor = $mol_decor;
-})($ || ($ = {}));
-//mol/decor/decor.ts
-;
-"use strict";
-var $;
-(function ($) {
-    class $mol_style_unit extends $mol_decor {
-        literal;
-        constructor(value, literal) {
-            super(value);
-            this.literal = literal;
-        }
-        postfix() {
-            return this.literal;
-        }
-        static per(value) { return new $mol_style_unit(value, '%'); }
-        static px(value) { return new $mol_style_unit(value, 'px'); }
-        static mm(value) { return new $mol_style_unit(value, 'mm'); }
-        static cm(value) { return new $mol_style_unit(value, 'cm'); }
-        static Q(value) { return new $mol_style_unit(value, 'Q'); }
-        static in(value) { return new $mol_style_unit(value, 'in'); }
-        static pc(value) { return new $mol_style_unit(value, 'pc'); }
-        static pt(value) { return new $mol_style_unit(value, 'pt'); }
-        static cap(value) { return new $mol_style_unit(value, 'cap'); }
-        static ch(value) { return new $mol_style_unit(value, 'ch'); }
-        static em(value) { return new $mol_style_unit(value, 'em'); }
-        static rem(value) { return new $mol_style_unit(value, 'rem'); }
-        static ex(value) { return new $mol_style_unit(value, 'ex'); }
-        static ic(value) { return new $mol_style_unit(value, 'ic'); }
-        static lh(value) { return new $mol_style_unit(value, 'lh'); }
-        static rlh(value) { return new $mol_style_unit(value, 'rlh'); }
-        static vh(value) { return new $mol_style_unit(value, 'vh'); }
-        static vw(value) { return new $mol_style_unit(value, 'vw'); }
-        static vi(value) { return new $mol_style_unit(value, 'vi'); }
-        static vb(value) { return new $mol_style_unit(value, 'vb'); }
-        static vmin(value) { return new $mol_style_unit(value, 'vmin'); }
-        static vmax(value) { return new $mol_style_unit(value, 'vmax'); }
-        static deg(value) { return new $mol_style_unit(value, 'deg'); }
-        static rad(value) { return new $mol_style_unit(value, 'rad'); }
-        static grad(value) { return new $mol_style_unit(value, 'grad'); }
-        static turn(value) { return new $mol_style_unit(value, 'turn'); }
-        static s(value) { return new $mol_style_unit(value, 's'); }
-        static ms(value) { return new $mol_style_unit(value, 'ms'); }
-    }
-    $.$mol_style_unit = $mol_style_unit;
-})($ || ($ = {}));
-//mol/style/unit/unit.ts
 ;
 "use strict";
 var $;
@@ -4438,6 +4438,203 @@ var $;
 "use strict";
 var $;
 (function ($) {
+    class $mol_video_player extends $mol_view {
+        dom_name() {
+            return "video";
+        }
+        playing(val) {
+            if (val !== undefined)
+                return val;
+            return false;
+        }
+        volume(val) {
+            if (val !== undefined)
+                return val;
+            return 0;
+        }
+        time(val) {
+            if (val !== undefined)
+                return val;
+            return 0;
+        }
+        duration() {
+            return 0;
+        }
+        attr() {
+            return {
+                src: this.uri(),
+                controls: this.controls(),
+                autoplay: this.autoplay(),
+                loop: this.loop(),
+                poster: this.poster()
+            };
+        }
+        event() {
+            return {
+                volumechange: (event) => this.revolume(event),
+                timeupdate: (event) => this.retime(event),
+                durationchange: (event) => this.redurate(event),
+                playing: (event) => this.play_started(event),
+                play: (event) => this.play(event),
+                pause: (event) => this.pause(event)
+            };
+        }
+        uri() {
+            return "";
+        }
+        controls() {
+            return true;
+        }
+        autoplay() {
+            return true;
+        }
+        loop() {
+            return false;
+        }
+        poster() {
+            return "";
+        }
+        revolume(event) {
+            if (event !== undefined)
+                return event;
+            return null;
+        }
+        retime(event) {
+            if (event !== undefined)
+                return event;
+            return null;
+        }
+        redurate(event) {
+            if (event !== undefined)
+                return event;
+            return null;
+        }
+        play_started(event) {
+            if (event !== undefined)
+                return event;
+            return null;
+        }
+        play(event) {
+            if (event !== undefined)
+                return event;
+            return null;
+        }
+        pause(event) {
+            if (event !== undefined)
+                return event;
+            return null;
+        }
+    }
+    __decorate([
+        $mol_mem
+    ], $mol_video_player.prototype, "playing", null);
+    __decorate([
+        $mol_mem
+    ], $mol_video_player.prototype, "volume", null);
+    __decorate([
+        $mol_mem
+    ], $mol_video_player.prototype, "time", null);
+    __decorate([
+        $mol_mem
+    ], $mol_video_player.prototype, "revolume", null);
+    __decorate([
+        $mol_mem
+    ], $mol_video_player.prototype, "retime", null);
+    __decorate([
+        $mol_mem
+    ], $mol_video_player.prototype, "redurate", null);
+    __decorate([
+        $mol_mem
+    ], $mol_video_player.prototype, "play_started", null);
+    __decorate([
+        $mol_mem
+    ], $mol_video_player.prototype, "play", null);
+    __decorate([
+        $mol_mem
+    ], $mol_video_player.prototype, "pause", null);
+    $.$mol_video_player = $mol_video_player;
+})($ || ($ = {}));
+//mol/video/player/-view.tree/player.view.tree.ts
+;
+"use strict";
+var $;
+(function ($) {
+    $mol_style_attach("mol/video/player/player.view.css", "[mol_video_player] {\n\tflex: 1 1 auto;\n}\n");
+})($ || ($ = {}));
+//mol/video/player/-css/player.view.css.ts
+;
+"use strict";
+var $;
+(function ($) {
+    var $$;
+    (function ($$) {
+        class $mol_video_player extends $.$mol_video_player {
+            dom_node() {
+                return super.dom_node();
+            }
+            volume(next) {
+                this.revolume();
+                if (next === undefined) {
+                    return this.dom_node().volume;
+                }
+                else {
+                    return this.dom_node().volume = Math.max(0, Math.min(next, 1));
+                }
+            }
+            time(next) {
+                this.retime();
+                if (next === undefined) {
+                    return this.dom_node().currentTime;
+                }
+                else {
+                    return this.dom_node().currentTime = Math.max(0, Math.min(next, this.duration()));
+                }
+            }
+            duration() {
+                this.redurate();
+                return this.dom_node().duration;
+            }
+            playing(next) {
+                if (next === undefined) {
+                    return false;
+                }
+                else {
+                    if (next) {
+                        this.dom_node().play();
+                    }
+                    else {
+                        this.dom_node().pause();
+                    }
+                    return next;
+                }
+            }
+            play() {
+                this.playing(true);
+            }
+            pause() {
+                this.playing(false);
+            }
+        }
+        __decorate([
+            $mol_mem
+        ], $mol_video_player.prototype, "volume", null);
+        __decorate([
+            $mol_mem
+        ], $mol_video_player.prototype, "time", null);
+        __decorate([
+            $mol_mem
+        ], $mol_video_player.prototype, "duration", null);
+        __decorate([
+            $mol_mem
+        ], $mol_video_player.prototype, "playing", null);
+        $$.$mol_video_player = $mol_video_player;
+    })($$ = $.$$ || ($.$$ = {}));
+})($ || ($ = {}));
+//mol/video/player/player.view.ts
+;
+"use strict";
+var $;
+(function ($) {
     class $mol_speck extends $mol_view {
         attr() {
             return {
@@ -6569,6 +6766,13 @@ var $;
         title() {
             return "$hyoo_game_arcade";
         }
+        Ear() {
+            const obj = new this.$.$mol_video_player();
+            obj.uri = () => "https://mp3d.jamendo.com/?trackid=1889563&format=mp33";
+            obj.loop = () => true;
+            obj.autoplay = () => false;
+            return obj;
+        }
         wireframe(next) {
             if (next !== undefined)
                 return next;
@@ -6592,6 +6796,7 @@ var $;
             const obj = new this.$.$mol_page();
             obj.title = () => this.title();
             obj.tools = () => [
+                this.Ear(),
                 this.Wireframe(),
                 this.Sources()
             ];
@@ -6683,6 +6888,9 @@ var $;
     ], $hyoo_game_arcade.prototype, "View", null);
     __decorate([
         $mol_mem
+    ], $hyoo_game_arcade.prototype, "Ear", null);
+    __decorate([
+        $mol_mem
     ], $hyoo_game_arcade.prototype, "wireframe", null);
     __decorate([
         $mol_mem
@@ -6717,6 +6925,7 @@ var $;
 (function ($) {
     var $$;
     (function ($$) {
+        const { rem } = $mol_style_unit;
         $mol_style_define($hyoo_game_arcade, {
             View: {
                 alignSelf: 'stretch',
@@ -6725,6 +6934,9 @@ var $;
             Hud: {
                 alignSelf: 'stretch',
                 justifySelf: 'stretch',
+            },
+            Ear: {
+                height: rem(2.5),
             },
         });
     })($$ = $.$$ || ($.$$ = {}));

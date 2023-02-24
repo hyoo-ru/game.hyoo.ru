@@ -52,6 +52,26 @@ $hyoo_game_eye $mol_3d_pane
 	angle? 1
 	wireframe false
 
+$mol_video_player $mol_view
+	dom_name \video
+	playing?val false
+	volume?val 0
+	time?val 0
+	duration 0
+	attr *
+		src <= uri \
+		controls <= controls true
+		autoplay <= autoplay true
+		loop <= loop false
+		poster <= poster \
+	event *
+		volumechange?event <=> revolume?event null
+		timeupdate?event <=> retime?event null
+		durationchange?event <=> redurate?event null
+		playing?event <=> play_started?event null
+		play?event <=> play?event null
+		pause?event <=> pause?event null
+
 $mol_speck $mol_view
 	attr *
 		^
@@ -291,6 +311,10 @@ $hyoo_game_arcade $mol_stack
 		<= Hud $mol_page
 			title <= title \$hyoo_game_arcade
 			tools /
+				<= Ear $mol_video_player
+					uri \https://mp3d.jamendo.com/?trackid=1889563&format=mp33
+					loop true
+					autoplay false
 				<= Wireframe $mol_check_box
 					title \Wireframe
 					checked? <=> wireframe? false

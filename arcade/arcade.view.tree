@@ -89,6 +89,10 @@ $hyoo_game_arcade $mol_stack
 		<= Hud $mol_page
 			title <= title \$hyoo_game_arcade
 			tools /
+				<= Ear $mol_video_player
+					uri \https://mp3d.jamendo.com/?trackid=1889563&format=mp33
+					loop true
+					autoplay false
 				<= Wireframe $mol_check_box
 					title \Wireframe
 					checked? <=> wireframe? false

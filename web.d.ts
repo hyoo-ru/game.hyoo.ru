@@ -14,64 +14,6 @@ declare namespace $ {
 }
 
 declare namespace $ {
-    function $mol_offline(): void;
-}
-
-declare namespace $ {
-}
-
-declare namespace $ {
-    class $mol_decor<Value> {
-        readonly value: Value;
-        constructor(value: Value);
-        prefix(): string;
-        valueOf(): Value;
-        postfix(): string;
-        toString(): string;
-    }
-}
-
-declare namespace $ {
-    type $mol_style_unit_length = '%' | 'px' | 'cm' | 'mm' | 'Q' | 'in' | 'pc' | 'pt' | 'cap' | 'ch' | 'em' | 'rem' | 'ex' | 'ic' | 'lh' | 'rlh' | 'vh' | 'vw' | 'vi' | 'vb' | 'vmin' | 'vmax';
-    type $mol_style_unit_angle = 'deg' | 'rad' | 'grad' | 'turn';
-    type $mol_style_unit_time = 's' | 'ms';
-    type $mol_style_unit_any = $mol_style_unit_length | $mol_style_unit_angle | $mol_style_unit_time;
-    class $mol_style_unit<Literal extends $mol_style_unit_any> extends $mol_decor<number> {
-        readonly literal: Literal;
-        constructor(value: number, literal: Literal);
-        postfix(): Literal;
-        static per(value: number): $mol_style_unit<"%">;
-        static px(value: number): $mol_style_unit<"px">;
-        static mm(value: number): $mol_style_unit<"mm">;
-        static cm(value: number): $mol_style_unit<"cm">;
-        static Q(value: number): $mol_style_unit<"Q">;
-        static in(value: number): $mol_style_unit<"in">;
-        static pc(value: number): $mol_style_unit<"pc">;
-        static pt(value: number): $mol_style_unit<"pt">;
-        static cap(value: number): $mol_style_unit<"cap">;
-        static ch(value: number): $mol_style_unit<"ch">;
-        static em(value: number): $mol_style_unit<"em">;
-        static rem(value: number): $mol_style_unit<"rem">;
-        static ex(value: number): $mol_style_unit<"ex">;
-        static ic(value: number): $mol_style_unit<"ic">;
-        static lh(value: number): $mol_style_unit<"lh">;
-        static rlh(value: number): $mol_style_unit<"rlh">;
-        static vh(value: number): $mol_style_unit<"vh">;
-        static vw(value: number): $mol_style_unit<"vw">;
-        static vi(value: number): $mol_style_unit<"vi">;
-        static vb(value: number): $mol_style_unit<"vb">;
-        static vmin(value: number): $mol_style_unit<"vmin">;
-        static vmax(value: number): $mol_style_unit<"vmax">;
-        static deg(value: number): $mol_style_unit<"deg">;
-        static rad(value: number): $mol_style_unit<"rad">;
-        static grad(value: number): $mol_style_unit<"grad">;
-        static turn(value: number): $mol_style_unit<"turn">;
-        static s(value: number): $mol_style_unit<"s">;
-        static ms(value: number): $mol_style_unit<"ms">;
-    }
-}
-
-declare namespace $ {
     const $mol_ambient_ref: unique symbol;
     type $mol_ambient_context = $;
     function $mol_ambient(this: $ | void, overrides: Partial<$>): $;
@@ -143,56 +85,6 @@ declare namespace $ {
 
 declare namespace $ {
     function $mol_style_attach(id: string, text: string): HTMLStyleElement | null;
-}
-
-declare namespace $ {
-    type $mol_style_func_name = 'calc' | 'hsla' | 'rgba' | 'var' | 'clamp' | 'url' | 'scale';
-    class $mol_style_func<Name extends $mol_style_func_name, Value = unknown> extends $mol_decor<Value> {
-        readonly name: Name;
-        constructor(name: Name, value: Value);
-        prefix(): string;
-        postfix(): string;
-        static calc<Value>(value: Value): $mol_style_func<"calc", Value>;
-        static vary<Name extends string>(name: Name): $mol_style_func<"var", Name>;
-        static url<Href extends string>(href: Href): $mol_style_func<"url", string>;
-        static hsla(hue: number, saturation: number, lightness: number, alpha: number): $mol_style_func<"hsla", (number | $mol_style_unit<"%">)[]>;
-        static clamp(min: $mol_style_unit<any>, mid: $mol_style_unit<any>, max: $mol_style_unit<any>): $mol_style_func<"clamp", $mol_style_unit<any>[]>;
-        static rgba(red: number, green: number, blue: number, alpha: number): $mol_style_func<"rgba", number[]>;
-        static scale(zoom: number): $mol_style_func<"scale", number[]>;
-    }
-}
-
-declare namespace $ {
-}
-
-declare namespace $ {
-    const $mol_theme: {
-        back: $mol_style_func<"var", "--mol_theme_back">;
-        hover: $mol_style_func<"var", "--mol_theme_hover">;
-        card: $mol_style_func<"var", "--mol_theme_card">;
-        current: $mol_style_func<"var", "--mol_theme_current">;
-        special: $mol_style_func<"var", "--mol_theme_special">;
-        text: $mol_style_func<"var", "--mol_theme_text">;
-        control: $mol_style_func<"var", "--mol_theme_control">;
-        shade: $mol_style_func<"var", "--mol_theme_shade">;
-        line: $mol_style_func<"var", "--mol_theme_line">;
-        focus: $mol_style_func<"var", "--mol_theme_focus">;
-        field: $mol_style_func<"var", "--mol_theme_field">;
-        image: $mol_style_func<"var", "--mol_theme_image">;
-    };
-}
-
-declare namespace $ {
-}
-
-declare namespace $ {
-    let $mol_gap: {
-        readonly block: $mol_style_func<"var", "--mol_gap_block">;
-        readonly text: $mol_style_func<"var", "--mol_gap_text">;
-        readonly round: $mol_style_func<"var", "--mol_gap_round">;
-        readonly space: $mol_style_func<"var", "--mol_gap_space">;
-        readonly blur: $mol_style_func<"var", "--mol_gap_blur">;
-    };
 }
 
 declare namespace $ {
@@ -538,6 +430,107 @@ declare namespace $ {
 }
 
 declare namespace $ {
+    class $mol_decor<Value> {
+        readonly value: Value;
+        constructor(value: Value);
+        prefix(): string;
+        valueOf(): Value;
+        postfix(): string;
+        toString(): string;
+    }
+}
+
+declare namespace $ {
+    type $mol_style_unit_length = '%' | 'px' | 'cm' | 'mm' | 'Q' | 'in' | 'pc' | 'pt' | 'cap' | 'ch' | 'em' | 'rem' | 'ex' | 'ic' | 'lh' | 'rlh' | 'vh' | 'vw' | 'vi' | 'vb' | 'vmin' | 'vmax';
+    type $mol_style_unit_angle = 'deg' | 'rad' | 'grad' | 'turn';
+    type $mol_style_unit_time = 's' | 'ms';
+    type $mol_style_unit_any = $mol_style_unit_length | $mol_style_unit_angle | $mol_style_unit_time;
+    class $mol_style_unit<Literal extends $mol_style_unit_any> extends $mol_decor<number> {
+        readonly literal: Literal;
+        constructor(value: number, literal: Literal);
+        postfix(): Literal;
+        static per(value: number): $mol_style_unit<"%">;
+        static px(value: number): $mol_style_unit<"px">;
+        static mm(value: number): $mol_style_unit<"mm">;
+        static cm(value: number): $mol_style_unit<"cm">;
+        static Q(value: number): $mol_style_unit<"Q">;
+        static in(value: number): $mol_style_unit<"in">;
+        static pc(value: number): $mol_style_unit<"pc">;
+        static pt(value: number): $mol_style_unit<"pt">;
+        static cap(value: number): $mol_style_unit<"cap">;
+        static ch(value: number): $mol_style_unit<"ch">;
+        static em(value: number): $mol_style_unit<"em">;
+        static rem(value: number): $mol_style_unit<"rem">;
+        static ex(value: number): $mol_style_unit<"ex">;
+        static ic(value: number): $mol_style_unit<"ic">;
+        static lh(value: number): $mol_style_unit<"lh">;
+        static rlh(value: number): $mol_style_unit<"rlh">;
+        static vh(value: number): $mol_style_unit<"vh">;
+        static vw(value: number): $mol_style_unit<"vw">;
+        static vi(value: number): $mol_style_unit<"vi">;
+        static vb(value: number): $mol_style_unit<"vb">;
+        static vmin(value: number): $mol_style_unit<"vmin">;
+        static vmax(value: number): $mol_style_unit<"vmax">;
+        static deg(value: number): $mol_style_unit<"deg">;
+        static rad(value: number): $mol_style_unit<"rad">;
+        static grad(value: number): $mol_style_unit<"grad">;
+        static turn(value: number): $mol_style_unit<"turn">;
+        static s(value: number): $mol_style_unit<"s">;
+        static ms(value: number): $mol_style_unit<"ms">;
+    }
+}
+
+declare namespace $ {
+    type $mol_style_func_name = 'calc' | 'hsla' | 'rgba' | 'var' | 'clamp' | 'url' | 'scale';
+    class $mol_style_func<Name extends $mol_style_func_name, Value = unknown> extends $mol_decor<Value> {
+        readonly name: Name;
+        constructor(name: Name, value: Value);
+        prefix(): string;
+        postfix(): string;
+        static calc<Value>(value: Value): $mol_style_func<"calc", Value>;
+        static vary<Name extends string>(name: Name): $mol_style_func<"var", Name>;
+        static url<Href extends string>(href: Href): $mol_style_func<"url", string>;
+        static hsla(hue: number, saturation: number, lightness: number, alpha: number): $mol_style_func<"hsla", (number | $mol_style_unit<"%">)[]>;
+        static clamp(min: $mol_style_unit<any>, mid: $mol_style_unit<any>, max: $mol_style_unit<any>): $mol_style_func<"clamp", $mol_style_unit<any>[]>;
+        static rgba(red: number, green: number, blue: number, alpha: number): $mol_style_func<"rgba", number[]>;
+        static scale(zoom: number): $mol_style_func<"scale", number[]>;
+    }
+}
+
+declare namespace $ {
+    const $mol_theme: {
+        back: $mol_style_func<"var", "--mol_theme_back">;
+        hover: $mol_style_func<"var", "--mol_theme_hover">;
+        card: $mol_style_func<"var", "--mol_theme_card">;
+        current: $mol_style_func<"var", "--mol_theme_current">;
+        special: $mol_style_func<"var", "--mol_theme_special">;
+        text: $mol_style_func<"var", "--mol_theme_text">;
+        control: $mol_style_func<"var", "--mol_theme_control">;
+        shade: $mol_style_func<"var", "--mol_theme_shade">;
+        line: $mol_style_func<"var", "--mol_theme_line">;
+        focus: $mol_style_func<"var", "--mol_theme_focus">;
+        field: $mol_style_func<"var", "--mol_theme_field">;
+        image: $mol_style_func<"var", "--mol_theme_image">;
+    };
+}
+
+declare namespace $ {
+}
+
+declare namespace $ {
+    let $mol_gap: {
+        readonly block: $mol_style_func<"var", "--mol_gap_block">;
+        readonly text: $mol_style_func<"var", "--mol_gap_text">;
+        readonly round: $mol_style_func<"var", "--mol_gap_round">;
+        readonly space: $mol_style_func<"var", "--mol_gap_space">;
+        readonly blur: $mol_style_func<"var", "--mol_gap_blur">;
+    };
+}
+
+declare namespace $ {
+}
+
+declare namespace $ {
     type $mol_view_content = $mol_view | Node | string | number | boolean;
     function $mol_view_visible_width(): number;
     function $mol_view_visible_height(): number;
@@ -609,6 +602,286 @@ interface Window {
     cordova: any;
 }
 declare namespace $ {
+}
+
+declare namespace $ {
+    class $mol_plugin extends $mol_view {
+        dom_node(next?: Element): Element;
+        attr_static(): {
+            [key: string]: string | number | boolean;
+        };
+        event(): {
+            [key: string]: (event: Event) => void;
+        };
+        render(): void;
+    }
+}
+
+declare namespace $ {
+    class $mol_stack extends $mol_view {
+    }
+}
+
+declare namespace $ {
+}
+
+declare namespace $ {
+    class $hyoo_game_realm extends $mol_object2 {
+        map(): string;
+        map_rows(): readonly string[][];
+        map_width(): number;
+        map_height(): number;
+        spawn_pos(): readonly number[];
+    }
+}
+
+declare namespace $ {
+    function $mol_array_lottery<Value>(list: readonly Value[]): Value;
+}
+
+declare namespace $.$$ {
+    class $hyoo_game_realm extends $.$hyoo_game_realm {
+        map_rows(): string[][];
+        map_width(): number;
+        map_height(): number;
+        coord_by_pos([px, py]: readonly number[]): number[];
+        pos_by_coord([cx, cy]: number[]): number[];
+        place_by_pos([px, py]: number[]): string;
+        spawn_places(): {
+            x: number;
+            y: number;
+        }[];
+        spawn_pos(): number[];
+    }
+}
+
+declare namespace $ {
+    class $hyoo_game_actor extends $mol_object2 {
+        auto(): any;
+        place_by_pos(id: any): string;
+        Realm(): $$.$hyoo_game_realm;
+        pos(next?: any): readonly number[];
+        pos_spawn(next?: any): readonly number[];
+        angle(next?: any): number;
+        move_speed_track(next?: any): number;
+        move_speed_side(next?: any): number;
+        move_speed_track_max(next?: any): number;
+        move_speed_side_max(next?: any): number;
+        turn_speed(next?: any): number;
+        turn_speed_max(next?: any): number;
+        turn_left(next?: any): boolean;
+        turn_right(next?: any): boolean;
+        move_forward(next?: any): boolean;
+        move_backward(next?: any): boolean;
+        move_right(next?: any): boolean;
+        move_left(next?: any): boolean;
+    }
+}
+
+declare namespace $ {
+    class $mol_after_timeout extends $mol_object2 {
+        delay: number;
+        task: () => void;
+        id: any;
+        constructor(delay: number, task: () => void);
+        destructor(): void;
+    }
+}
+
+declare namespace $ {
+    class $mol_state_time extends $mol_object {
+        static task(precision: number, reset?: null): $mol_after_timeout | $mol_after_frame;
+        static now(precision: number): number;
+    }
+}
+
+declare namespace $.$$ {
+    class $hyoo_game_actor extends $.$hyoo_game_actor {
+        move_speed_track(): number;
+        move_speed_side(): number;
+        turn_speed(): number;
+        auto(): void;
+    }
+}
+
+declare namespace $ {
+    class $mol_3d_shape extends $mol_object {
+        geometry(): Float32Array;
+        size(): number;
+        skin(): Float32Array;
+    }
+    class $mol_3d_shape_triangle extends $mol_3d_shape {
+        geometry(): Float32Array;
+        skin(): Float32Array;
+    }
+    class $mol_3d_shape_square extends $mol_3d_shape {
+        geometry(): Float32Array;
+        skin(): Float32Array;
+    }
+}
+
+declare namespace $ {
+    function $mol_wire_sync<Host extends object>(obj: Host): (Host extends (...args: infer Args) => infer Res ? Res extends Promise<infer Res2> ? (...args: Args) => Res2 : Host : {}) & { [key in keyof Host]: Host[key] extends (...args: infer Args_1) => Promise<infer Res_1> ? (...args: Args_1) => Res_1 : Host[key]; };
+}
+
+declare namespace $ {
+    class $mol_3d_image extends $mol_object {
+        uri(): string;
+        load(): Promise<HTMLImageElement>;
+        data(): HTMLImageElement | ImageData;
+    }
+}
+
+declare namespace $ {
+    let $mol_3d_glsl_both: string;
+    let $mol_3d_glsl_vert: string;
+    let $mol_3d_glsl_frag: string;
+}
+
+declare namespace $ {
+    class $mol_3d_mat4 extends Float32Array {
+        static identity(): $mol_3d_mat4;
+        static translation([x, y, z]: Float32List): $mol_3d_mat4;
+        static scaling([x, y, z]: Float32List): $mol_3d_mat4;
+        static rotation([x, y, z]: Float32List, angle: number): $mol_3d_mat4;
+        static orthographic(left: number, right: number, bottom: number, top: number, near: number, far: number): $mol_3d_mat4;
+        static perspective(fov: number, aspect: number, near: number, far: number): $mol_3d_mat4;
+        static multiply(head: Float32List, ...tail: Float32List[]): $mol_3d_mat4;
+        inversed(): $mol_3d_mat4;
+    }
+}
+
+declare namespace $ { }
+
+declare namespace $ {
+    class $mol_3d_object extends $mol_object {
+        shape(): $mol_3d_shape;
+        texture(): $mol_3d_image;
+        transform(): $mol_3d_mat4;
+    }
+}
+
+declare namespace $ {
+    class $hyoo_game_actor_ghost extends $hyoo_game_actor {
+    }
+}
+
+declare namespace $.$$ {
+    class $hyoo_game_actor_ghost extends $.$hyoo_game_actor_ghost {
+        auto(): void;
+    }
+}
+
+declare namespace $ {
+    class $mol_3d_texture extends $mol_object {
+        readonly api: WebGL2RenderingContext;
+        readonly native: WebGLTexture;
+        constructor(api: WebGL2RenderingContext, native?: WebGLTexture);
+        destructor(): void;
+        fill(color: Uint8Array): Uint8Array;
+        send_one(data: TexImageSource): TexImageSource;
+        send_multi(data: TexImageSource[]): TexImageSource[];
+    }
+}
+
+declare namespace $ {
+    class $mol_3d_glob extends Object {
+        readonly api: WebGL2RenderingContext;
+        readonly location: WebGLUniformLocation;
+        constructor(api: WebGL2RenderingContext, location: WebGLUniformLocation);
+        vector_int(data: Int32List, offset?: number, length?: number): Int32List;
+        vector_uint(data: Int32List, offset?: number, length?: number): Int32List;
+        vector_float(data: Float32List, offset?: number, length?: number): Float32List;
+        matrix(data: Float32List, transpose?: boolean, offset?: number, length?: number): Float32List;
+        texture(): $mol_3d_texture;
+    }
+}
+
+declare namespace $ {
+    class $mol_3d_buffer extends Object {
+        readonly api: WebGL2RenderingContext;
+        readonly native: WebGLBuffer;
+        constructor(api: WebGL2RenderingContext, native: WebGLBuffer);
+        send(data: ArrayBufferView[]): ArrayBufferView[];
+    }
+}
+
+declare namespace $ {
+    class $mol_3d_param extends Object {
+        readonly api: WebGL2RenderingContext;
+        readonly location: number;
+        constructor(api: WebGL2RenderingContext, location: number);
+        vector(vals: number): $mol_3d_buffer;
+        vectors(vals: number): $mol_3d_buffer;
+        vectors_byte(vals: number): $mol_3d_buffer;
+        vectors_uint(vals: number): $mol_3d_buffer;
+        matrix([cols, rows]: [number, number]): $mol_3d_buffer;
+        matrices([cols, rows]: [number, number]): $mol_3d_buffer;
+    }
+}
+
+declare namespace $ {
+    class $mol_3d_geometry extends Object {
+        readonly api: WebGL2RenderingContext;
+        readonly vertexes: WebGLVertexArrayObject | null;
+        constructor(api: WebGL2RenderingContext, vertexes?: WebGLVertexArrayObject | null);
+        destructor(): void;
+        size: number;
+        count: number;
+        use(task: (geometry: $mol_3d_geometry) => void): this;
+    }
+}
+
+declare namespace $ {
+    type Type = 'mat4' | 'mat3' | 'mat2' | 'vec4' | 'vec3' | 'vec2' | 'ivec4' | 'ivec3' | 'ivec2' | 'uvec4' | 'uvec3' | 'uvec2' | 'float' | 'int' | 'uint' | 'sampler2D' | 'sampler2DShadow' | 'sampler2DArray' | 'sampler2DArrayShadow' | 'samplerCube' | 'samplerCubeShadow' | 'sampler3D';
+    export type $mol_3d_program_face = {
+        glob?: Record<string, Type>;
+        input?: Record<string, Type>;
+        pipe?: Record<string, Type>;
+        output?: Record<string, Type>;
+    };
+    export class $mol_3d_program<Face extends $mol_3d_program_face> extends Object {
+        readonly api: WebGL2RenderingContext;
+        readonly native: WebGLProgram;
+        constructor(api: WebGL2RenderingContext, native: WebGLProgram);
+        glob(name: keyof Face['glob']): $mol_3d_glob;
+        param(name: keyof Face['input']): $mol_3d_param | null;
+        geometry(id: any): $mol_3d_geometry;
+        use(task: (geometry: $mol_3d_program<Face>) => void): this;
+        point(size: number, offset?: number): void;
+        line(size: number, offset?: number): void;
+        triangle(size: number, offset?: number): void;
+        strip(size: number, offset?: number): void;
+        points(first: number, vertices: number, instances?: number): void;
+        lines(first: number, vertices: number, instances?: number): void;
+        strips(first: number, vertices: number, instances?: number): void;
+    }
+    export {};
+}
+
+declare namespace $ {
+    class $mol_3d_context extends Object {
+        readonly native: WebGL2RenderingContext;
+        constructor(native: WebGL2RenderingContext);
+        shader(type: GLenum, code: string): WebGLShader;
+        func<Face extends $mol_3d_program_face>(name: string, face: Face): $mol_3d_program<Face>;
+        program<Face extends $mol_3d_program_face>(face: Face, vertex: string, fragment: string): $mol_3d_program<Face>;
+    }
+}
+
+declare namespace $ {
+    class $mol_3d_pane extends $mol_view {
+        dom_name(): string;
+        context(): $mol_3d_context;
+        field(): {
+            width: number;
+            height: number;
+        };
+        paint(): any;
+        context_native(): WebGL2RenderingContext;
+        width(): number;
+        height(): number;
+    }
 }
 
 declare namespace $ {
@@ -754,290 +1027,7 @@ declare namespace $ {
 }
 
 declare namespace $ {
-    class $mol_plugin extends $mol_view {
-        dom_node(next?: Element): Element;
-        attr_static(): {
-            [key: string]: string | number | boolean;
-        };
-        event(): {
-            [key: string]: (event: Event) => void;
-        };
-        render(): void;
-    }
-}
-
-declare namespace $ {
     function $mol_style_define<Component extends $mol_view, Config extends $mol_style_guard<Component, Config>>(Component: new () => Component, config: Config): HTMLStyleElement | null;
-}
-
-declare namespace $ {
-    class $mol_stack extends $mol_view {
-    }
-}
-
-declare namespace $ {
-}
-
-declare namespace $ {
-    class $hyoo_game_realm extends $mol_object2 {
-        map(): string;
-        map_rows(): readonly string[][];
-        map_width(): number;
-        map_height(): number;
-        spawn_pos(): readonly number[];
-    }
-}
-
-declare namespace $ {
-    function $mol_array_lottery<Value>(list: readonly Value[]): Value;
-}
-
-declare namespace $.$$ {
-    class $hyoo_game_realm extends $.$hyoo_game_realm {
-        map_rows(): string[][];
-        map_width(): number;
-        map_height(): number;
-        coord_by_pos([px, py]: readonly number[]): number[];
-        pos_by_coord([cx, cy]: number[]): number[];
-        place_by_pos([px, py]: number[]): string;
-        spawn_places(): {
-            x: number;
-            y: number;
-        }[];
-        spawn_pos(): number[];
-    }
-}
-
-declare namespace $ {
-    class $hyoo_game_actor extends $mol_object2 {
-        auto(): any;
-        place_by_pos(id: any): string;
-        Realm(): $$.$hyoo_game_realm;
-        pos(next?: any): readonly number[];
-        pos_spawn(next?: any): readonly number[];
-        angle(next?: any): number;
-        move_speed_track(next?: any): number;
-        move_speed_side(next?: any): number;
-        move_speed_track_max(next?: any): number;
-        move_speed_side_max(next?: any): number;
-        turn_speed(next?: any): number;
-        turn_speed_max(next?: any): number;
-        turn_left(next?: any): boolean;
-        turn_right(next?: any): boolean;
-        move_forward(next?: any): boolean;
-        move_backward(next?: any): boolean;
-        move_right(next?: any): boolean;
-        move_left(next?: any): boolean;
-    }
-}
-
-declare namespace $ {
-    class $mol_after_timeout extends $mol_object2 {
-        delay: number;
-        task: () => void;
-        id: any;
-        constructor(delay: number, task: () => void);
-        destructor(): void;
-    }
-}
-
-declare namespace $ {
-    class $mol_state_time extends $mol_object {
-        static task(precision: number, reset?: null): $mol_after_timeout | $mol_after_frame;
-        static now(precision: number): number;
-    }
-}
-
-declare namespace $.$$ {
-    class $hyoo_game_actor extends $.$hyoo_game_actor {
-        move_speed_track(): number;
-        move_speed_side(): number;
-        turn_speed(): number;
-        auto(): void;
-    }
-}
-
-declare namespace $ {
-    class $mol_3d_shape extends $mol_object {
-        geometry(): Float32Array;
-        size(): number;
-        skin(): Float32Array;
-    }
-    class $mol_3d_shape_triangle extends $mol_3d_shape {
-        geometry(): Float32Array;
-        skin(): Float32Array;
-    }
-    class $mol_3d_shape_square extends $mol_3d_shape {
-        geometry(): Float32Array;
-        skin(): Float32Array;
-    }
-}
-
-declare namespace $ {
-    function $mol_wire_sync<Host extends object>(obj: Host): (Host extends (...args: infer Args) => infer Res ? Res extends Promise<infer Res2> ? (...args: Args) => Res2 : Host : {}) & { [key in keyof Host]: Host[key] extends (...args: infer Args_1) => Promise<infer Res_1> ? (...args: Args_1) => Res_1 : Host[key]; };
-}
-
-declare namespace $ {
-    class $mol_3d_image extends $mol_object {
-        uri(): string;
-        load(): Promise<HTMLImageElement>;
-        data(): HTMLImageElement | ImageData;
-    }
-}
-
-declare namespace $ {
-    let $mol_3d_glsl_both: string;
-    let $mol_3d_glsl_vert: string;
-    let $mol_3d_glsl_frag: string;
-}
-
-declare namespace $ { }
-
-declare namespace $ {
-    class $mol_3d_mat4 extends Float32Array {
-        static identity(): $mol_3d_mat4;
-        static translation([x, y, z]: Float32List): $mol_3d_mat4;
-        static scaling([x, y, z]: Float32List): $mol_3d_mat4;
-        static rotation([x, y, z]: Float32List, angle: number): $mol_3d_mat4;
-        static orthographic(left: number, right: number, bottom: number, top: number, near: number, far: number): $mol_3d_mat4;
-        static perspective(fov: number, aspect: number, near: number, far: number): $mol_3d_mat4;
-        static multiply(head: Float32List, ...tail: Float32List[]): $mol_3d_mat4;
-        inversed(): $mol_3d_mat4;
-    }
-}
-
-declare namespace $ {
-    class $mol_3d_object extends $mol_object {
-        shape(): $mol_3d_shape;
-        texture(): $mol_3d_image;
-        transform(): $mol_3d_mat4;
-    }
-}
-
-declare namespace $ {
-    class $hyoo_game_actor_ghost extends $hyoo_game_actor {
-    }
-}
-
-declare namespace $.$$ {
-    class $hyoo_game_actor_ghost extends $.$hyoo_game_actor_ghost {
-        auto(): void;
-    }
-}
-
-declare namespace $ {
-    class $mol_3d_texture extends $mol_object {
-        readonly api: WebGL2RenderingContext;
-        readonly native: WebGLTexture;
-        constructor(api: WebGL2RenderingContext, native?: WebGLTexture);
-        destructor(): void;
-        fill(color: Uint8Array): Uint8Array;
-        send_one(data: TexImageSource): TexImageSource;
-        send_multi(data: TexImageSource[]): TexImageSource[];
-    }
-}
-
-declare namespace $ {
-    class $mol_3d_glob extends Object {
-        readonly api: WebGL2RenderingContext;
-        readonly location: WebGLUniformLocation;
-        constructor(api: WebGL2RenderingContext, location: WebGLUniformLocation);
-        vector_int(data: Int32List, offset?: number, length?: number): Int32List;
-        vector_uint(data: Int32List, offset?: number, length?: number): Int32List;
-        vector_float(data: Float32List, offset?: number, length?: number): Float32List;
-        matrix(data: Float32List, transpose?: boolean, offset?: number, length?: number): Float32List;
-        texture(): $mol_3d_texture;
-    }
-}
-
-declare namespace $ {
-    class $mol_3d_buffer extends Object {
-        readonly api: WebGL2RenderingContext;
-        readonly native: WebGLBuffer;
-        constructor(api: WebGL2RenderingContext, native: WebGLBuffer);
-        send(data: ArrayBufferView[]): ArrayBufferView[];
-    }
-}
-
-declare namespace $ {
-    class $mol_3d_param extends Object {
-        readonly api: WebGL2RenderingContext;
-        readonly location: number;
-        constructor(api: WebGL2RenderingContext, location: number);
-        vector(vals: number): $mol_3d_buffer;
-        vectors(vals: number): $mol_3d_buffer;
-        vectors_byte(vals: number): $mol_3d_buffer;
-        vectors_uint(vals: number): $mol_3d_buffer;
-        matrix([cols, rows]: [number, number]): $mol_3d_buffer;
-        matrices([cols, rows]: [number, number]): $mol_3d_buffer;
-    }
-}
-
-declare namespace $ {
-    class $mol_3d_geometry extends Object {
-        readonly api: WebGL2RenderingContext;
-        readonly vertexes: WebGLVertexArrayObject | null;
-        constructor(api: WebGL2RenderingContext, vertexes?: WebGLVertexArrayObject | null);
-        destructor(): void;
-        size: number;
-        count: number;
-        use(task: (geometry: $mol_3d_geometry) => void): this;
-    }
-}
-
-declare namespace $ {
-    type Type = 'mat4' | 'mat3' | 'mat2' | 'vec4' | 'vec3' | 'vec2' | 'ivec4' | 'ivec3' | 'ivec2' | 'uvec4' | 'uvec3' | 'uvec2' | 'float' | 'int' | 'uint' | 'sampler2D' | 'sampler2DShadow' | 'sampler2DArray' | 'sampler2DArrayShadow' | 'samplerCube' | 'samplerCubeShadow' | 'sampler3D';
-    export type $mol_3d_program_face = {
-        glob?: Record<string, Type>;
-        input?: Record<string, Type>;
-        pipe?: Record<string, Type>;
-        output?: Record<string, Type>;
-    };
-    export class $mol_3d_program<Face extends $mol_3d_program_face> extends Object {
-        readonly api: WebGL2RenderingContext;
-        readonly native: WebGLProgram;
-        constructor(api: WebGL2RenderingContext, native: WebGLProgram);
-        glob(name: keyof Face['glob']): $mol_3d_glob;
-        param(name: keyof Face['input']): $mol_3d_param | null;
-        geometry(id: any): $mol_3d_geometry;
-        use(task: (geometry: $mol_3d_program<Face>) => void): this;
-        point(size: number, offset?: number): void;
-        line(size: number, offset?: number): void;
-        triangle(size: number, offset?: number): void;
-        strip(size: number, offset?: number): void;
-        points(first: number, vertices: number, instances?: number): void;
-        lines(first: number, vertices: number, instances?: number): void;
-        strips(first: number, vertices: number, instances?: number): void;
-    }
-    export {};
-}
-
-declare namespace $ {
-    class $mol_3d_context extends Object {
-        readonly native: WebGL2RenderingContext;
-        constructor(native: WebGL2RenderingContext);
-        shader(type: GLenum, code: string): WebGLShader;
-        func<Face extends $mol_3d_program_face>(name: string, face: Face): $mol_3d_program<Face>;
-        program<Face extends $mol_3d_program_face>(face: Face, vertex: string, fragment: string): $mol_3d_program<Face>;
-    }
-}
-
-declare namespace $ {
-    class $mol_3d_pane extends $mol_view {
-        dom_name(): string;
-        context(): $mol_3d_context;
-        field(): {
-            width: number;
-            height: number;
-        };
-        paint(): any;
-        context_native(): WebGL2RenderingContext;
-        width(): number;
-        height(): number;
-    }
-}
-
-declare namespace $.$$ {
 }
 
 declare namespace $.$$ {
@@ -1049,6 +1039,9 @@ declare namespace $.$$ {
         scissor(): readonly [0, 0, number, number];
         render(): void;
     }
+}
+
+declare namespace $.$$ {
 }
 
 declare namespace $ {
@@ -1066,10 +1059,6 @@ declare namespace $ {
         [index in keyof Tasks]: index extends number ? ReturnType<Tasks[index]> : Tasks[index];
     };
 }
-
-declare namespace $ { }
-
-declare namespace $ { }
 
 declare namespace $.$$ {
     class $hyoo_game_eye extends $.$hyoo_game_eye {
@@ -1114,6 +1103,10 @@ declare namespace $.$$ {
     }
 }
 
+declare namespace $ { }
+
+declare namespace $ { }
+
 declare namespace $ {
     class $mol_video_player extends $mol_view {
         dom_name(): string;
@@ -1150,9 +1143,6 @@ declare namespace $ {
     }
 }
 
-declare namespace $ {
-}
-
 declare namespace $.$$ {
     class $mol_video_player extends $.$mol_video_player {
         dom_node(): HTMLVideoElement;
@@ -1163,6 +1153,9 @@ declare namespace $.$$ {
         play(): void;
         pause(): void;
     }
+}
+
+declare namespace $ {
 }
 
 declare namespace $ {
@@ -1180,9 +1173,6 @@ declare namespace $ {
 }
 
 declare namespace $ {
-}
-
-declare namespace $ {
     let $mol_layer: {
         readonly hover: $mol_style_func<"var", "--mol_layer_hover">;
         readonly focus: $mol_style_func<"var", "--mol_layer_focus">;
@@ -1190,6 +1180,9 @@ declare namespace $ {
         readonly float: $mol_style_func<"var", "--mol_layer_float">;
         readonly popup: $mol_style_func<"var", "--mol_layer_popup">;
     };
+}
+
+declare namespace $ {
 }
 
 declare namespace $ {
@@ -1329,9 +1322,6 @@ declare namespace $ {
     }
 }
 
-declare namespace $ {
-}
-
 declare namespace $.$$ {
     class $mol_button extends $.$mol_button {
         status(next?: any[]): any[];
@@ -1343,6 +1333,9 @@ declare namespace $.$$ {
         hint_safe(): string;
         sub_visible(): ($mol_view_content | $mol_speck)[];
     }
+}
+
+declare namespace $ {
 }
 
 declare namespace $ {
@@ -1532,9 +1525,6 @@ declare namespace $ {
     }
 }
 
-declare namespace $ {
-}
-
 declare namespace $.$$ {
     class $mol_link extends $.$mol_link {
         uri_toggle(): string;
@@ -1548,6 +1538,9 @@ declare namespace $.$$ {
         target(): '_self' | '_blank' | '_top' | '_parent' | string;
         hint_safe(): string;
     }
+}
+
+declare namespace $ {
 }
 
 declare namespace $ {
@@ -1740,9 +1733,6 @@ declare namespace $ {
 }
 
 declare namespace $.$$ {
-}
-
-declare namespace $.$$ {
     class $mol_scroll extends $.$mol_scroll {
         scroll_top(next?: number, cache?: 'cache'): number;
         scroll_left(next?: number, cache?: 'cache'): number;
@@ -1750,6 +1740,9 @@ declare namespace $.$$ {
         minimal_height(): number;
         minimal_width(): number;
     }
+}
+
+declare namespace $.$$ {
 }
 
 declare namespace $ {
@@ -1955,7 +1948,11 @@ declare namespace $ {
     }
 }
 
-declare namespace $.$$ {
+declare namespace $ {
+    function $mol_offline(): void;
+}
+
+declare namespace $ {
 }
 
 declare namespace $.$$ {
@@ -1978,6 +1975,9 @@ declare namespace $.$$ {
         avatar_trans(index: number): $mol_3d_mat4;
         auto(): void;
     }
+}
+
+declare namespace $.$$ {
 }
 
 export = $;

@@ -1123,6 +1123,7 @@ declare namespace $ {
         };
         zIndex: number | Common;
         opacity: number | Common;
+        aspectRatio: number | Common;
     }
     export {};
 }

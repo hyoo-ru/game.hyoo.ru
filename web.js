@@ -3151,7 +3151,7 @@ var $;
             for (let i = 0; i < data.length; ++i) {
                 this.api.texSubImage3D(this.api.TEXTURE_2D_ARRAY, 0, 0, 0, i, size, size, 1, this.api.RGBA, this.api.UNSIGNED_BYTE, data[i]);
             }
-            const anisotropic = this.api.getExtension('EXT_texture_filter_anisotropic');
+            const anisotropic = this.api.getExtension('EXT_texture_filter_anisotropic') || this.api.getExtension('WEBKIT_EXT_texture_filter_anisotropic');
             const max = this.api.getParameter(anisotropic.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
             this.api.texParameterf(this.api.TEXTURE_2D_ARRAY, anisotropic.TEXTURE_MAX_ANISOTROPY_EXT, max);
             this.api.texParameteri(this.api.TEXTURE_2D_ARRAY, this.api.TEXTURE_MIN_FILTER, this.api.LINEAR_MIPMAP_LINEAR);

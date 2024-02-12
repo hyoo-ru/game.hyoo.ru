@@ -3152,8 +3152,10 @@ var $;
                 this.api.texSubImage3D(this.api.TEXTURE_2D_ARRAY, 0, 0, 0, i, size, size, 1, this.api.RGBA, this.api.UNSIGNED_BYTE, data[i]);
             }
             const anisotropic = this.api.getExtension('EXT_texture_filter_anisotropic') || this.api.getExtension('WEBKIT_EXT_texture_filter_anisotropic');
+		if(anisotropic) {
             const max = this.api.getParameter(anisotropic.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
             this.api.texParameterf(this.api.TEXTURE_2D_ARRAY, anisotropic.TEXTURE_MAX_ANISOTROPY_EXT, max);
+		}
             this.api.texParameteri(this.api.TEXTURE_2D_ARRAY, this.api.TEXTURE_MIN_FILTER, this.api.LINEAR_MIPMAP_LINEAR);
             this.api.texParameteri(this.api.TEXTURE_2D_ARRAY, this.api.TEXTURE_MAG_FILTER, this.api.LINEAR);
             this.api.pixelStorei(this.api.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
